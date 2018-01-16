@@ -11,6 +11,6 @@ package cs455.overlay.node;
  */
 public class Registry {
     public static void main(String[] args){
-        
+        System.out.println("Registry Node.");
     }
 }

@@ -11,6 +11,7 @@ package cs455.overlay.node;
  */
 public class MessagingNode {
     public static void main(String[] args ){
+        System.out.println("Messaging Node.");
         
     }
 }

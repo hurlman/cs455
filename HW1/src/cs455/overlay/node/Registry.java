@@ -8,6 +8,8 @@ package cs455.overlay.node;
 import java.net.*;
 import java.io.*;
 import cs455.overlay.*;
+import java.util.Scanner;
+
 /**
  *
  * @author hurleym
@@ -19,52 +21,95 @@ public class Registry {
     public static void main(String[] args) {
         try {
             Port = Integer.parseInt(args[0]);
-            System.out.println(String.format("Registry started.  Listening at %s on port %s.", InetAddress.getLocalHost(), Port));
-
-            StartListener();
         } catch (NumberFormatException e) {
             System.out.println(String.format("%s is not a valid integer.", args[0]));
             System.exit(0);
-        } catch (IllegalArgumentException e) {
-            System.out.println(String.format("Port %s out of range.  Must be between 0 and 65535.", Port));
+        }
+        System.out.println("Starting registry.");
+        // Register nodes in separate thread to keep console alive.
+        Thread registerThread = new Thread(() -> RegisterNodes());
+        registerThread.start();
+
+        try {
+            // Short wait for listener to start before displaying console instructions.
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            System.out.println(ex.getMessage());
+        }
+        System.out.println("'list-messaging-nodes' or 'l'");
+        System.out.println("'setup-overlay #' or 's #'  (e.g. s 3)");
+        Scanner keyboard = new Scanner(System.in);
+        while (true) {
+            String input = keyboard.nextLine();
+            if (input.equals("l") || input.equals("list-messaging-nodes")) {
+                ListNodes();
+            } else if (input.startsWith("s ") || input.startsWith("setup-overlay ")) {
+                int routingTableSize;
+                try {
+                    routingTableSize = Integer.parseInt(input.substring(input.lastIndexOf(" ") + 1));
+                } catch (NumberFormatException e) {
+                    System.out.println(String.format("%s is not a valid integer.", input.substring(input.lastIndexOf(" ") + 1)));
+                    continue;
+                }
+                // Stop registering nodes and create the overlay.
+                registerThread.interrupt();
+                SetupOverlay(routingTableSize);
+                break;
+            } else {
+                System.out.println(String.format("Unknown command: %s", input));
+            }
+        }
+        
+        // Overlay is now setup.  Begin taking new commands.
+    }
+
+    private static void RegisterNodes() {
+        try {
+            ServerSocket listener = new ServerSocket(Port);
+            System.out.println(String.format("Listening at %s on port %s.", InetAddress.getLocalHost(), Port));
+            System.out.println("Awaiting messaging node registration.");
+
+            while (!Thread.currentThread().isInterrupted()) {
+                Socket nodeSocket = listener.accept();
+                new Thread(() -> HandleNodeRegistration(nodeSocket)).start();
+            }
+        } catch (IOException e) {
+            System.out.println(String.format("Unable to open server socket on port %s. %s", Port, e.getMessage()));
             System.exit(0);
         } catch (Exception e) {
-            System.out.println(String.format("Unable to open socket on port %s.", Port));
+            System.out.println(e.getMessage());
             System.exit(0);
         }
+        System.out.println("Node registration complete.");
     }
 
-    private static void StartListener() throws Exception {
-        System.out.println("Awaiting messaging node registration.  Press 'L' to list registered nodes.");
-        System.out.println("Press 'L' to list registered nodes.");
-        System.out.println("Press 'S' to stop accepting new nodes.");
-
-        ServerSocket listener = new ServerSocket(Port);
-
-        while (true) {
-            Socket nodeSocket = listener.accept();
-            new Thread(() -> HandleConnection(nodeSocket)).start();
-        }
-    }
-
-    private static void HandleConnection(Socket messageNodeSocket) {
+    private static void HandleNodeRegistration(Socket messageNodeSocket) {
         try {
+            System.out.println("Client has connected.");
             Thread currentThread = Thread.currentThread();
             DataInputStream inFromNode = new DataInputStream(messageNodeSocket.getInputStream());
             DataOutputStream outToNode = new DataOutputStream(messageNodeSocket.getOutputStream());
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[Constants.BUFFER_SIZE];
             int bytesread;
             while (true) {
                 bytesread = inFromNode.read(buffer);
-
-                byte[] out = String.format("%s bytes read. Thread %s", bytesread, currentThread.getId()).getBytes();
+//TODO: Parse input for registration.
+                byte[] out = String.format("%s bytes read. Thread %s\r", bytesread, currentThread.getId()).getBytes();
                 outToNode.write(out);
             }
 
         } catch (IOException e) {
-            System.out.println(String.format("An error occurred getting stream. %s", e.getMessage()));
+            System.out.println(String.format("Client has disconnected."));
         }
 
+    }
+
+    private static void ListNodes() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private static void SetupOverlay(int routingTableSize) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

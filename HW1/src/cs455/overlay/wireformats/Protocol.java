@@ -10,8 +10,9 @@ import cs455.overlay.*;
  *
  * @author Mike
  */
-public interface Protocol {
-    public byte[] RAWDATA = new byte[Constants.BUFFER_SIZE];
-    public void ParseData();
-    public byte[] BuildOutput();
+public abstract class Protocol {
+    public Constants.MessageType MessageType;
+    
+    abstract void ParseData(byte[] rawData);
+    abstract byte[] BuildOutput();
 }

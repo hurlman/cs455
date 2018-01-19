@@ -8,6 +8,8 @@ package cs455.overlay.node;
 import java.net.*;
 import java.io.*;
 import cs455.overlay.*;
+import cs455.overlay.wireformats.*;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -17,6 +19,8 @@ import java.util.Scanner;
 public class Registry {
 
     private static int Port;
+    private static int ID = 0;
+    private static Map<Integer, RegisteredNode> RegisteredNodes;
 
     public static void main(String[] args) {
         try {
@@ -94,15 +98,31 @@ public class Registry {
             int bytesread;
             while (true) {
                 bytesread = inFromNode.read(buffer);
-//TODO: Parse input for registration.
-                byte[] out = String.format("%s bytes read. Thread %s\r", bytesread, currentThread.getId()).getBytes();
-                outToNode.write(out);
+                Constants.MessageType msgType = Constants.MessageType.GetMessageType(buffer[0]);
+                switch(msgType){
+                    case OVERLAY_NODE_SENDS_REGISTRATION:
+                        OverlayNodeSendsRegistration nodeReg = new OverlayNodeSendsRegistration(buffer);
+                        System.out.println(String.format("IP: %s, Port %s", nodeReg.IPAddress, nodeReg.Port));
+                        break;
+                    case OVERLAY_NODE_SENDS_DEREGISTRATION:
+                        OverlayNodeSendsDeregistration nodeDereg = new OverlayNodeSendsDeregistration(buffer);
+                        break;
+                    default:
+                        System.out.println("Invalid message type received.");
+                }
+                
+                
             }
 
         } catch (IOException e) {
             System.out.println(String.format("Client has disconnected."));
         }
 
+    }
+    
+    private static int GetID(){
+        ID++;
+        return ID;
     }
 
     private static void ListNodes() {

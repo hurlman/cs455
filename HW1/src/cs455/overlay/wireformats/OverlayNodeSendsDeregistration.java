@@ -4,33 +4,25 @@
  * and open the template in the editor.
  */
 package cs455.overlay.wireformats;
-import cs455.overlay.*;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  *
  * @author Mike
  */
-public class OverlayNodeSendsRegistration extends Protocol {
-
+public class OverlayNodeSendsDeregistration extends Protocol{
+    
     public byte[] IPAddress;
     public int Port;
     
-    public OverlayNodeSendsRegistration (byte[] rawData){
+    public OverlayNodeSendsDeregistration (){}
+    
+    public OverlayNodeSendsDeregistration(byte[] rawData){
         ParseData(rawData);
     }
-    
-    public OverlayNodeSendsRegistration(){}
-    
+
     @Override
     void ParseData(byte[] rawData) {
         MessageType = MessageType.GetMessageType(rawData[0]);
-        int len = rawData[1];
-                
-        IPAddress = Arrays.copyOfRange(rawData, 2, len + 2);
-        ByteBuffer wrapped = ByteBuffer.wrap(rawData, len + 2, 4);
-        Port = wrapped.getInt();
     }
 
     @Override

@@ -5,7 +5,6 @@
  */
 package cs455.overlay.wireformats;
 import cs455.overlay.*;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -25,12 +24,15 @@ public class OverlayNodeSendsRegistration extends Protocol {
     
     @Override
     void ParseData(byte[] rawData) {
-        MessageType = MessageType.GetMessageType(rawData[0]);
-        int len = rawData[1];
-                
-        IPAddress = Arrays.copyOfRange(rawData, 2, len + 2);
-        ByteBuffer wrapped = ByteBuffer.wrap(rawData, len + 2, 4);
-        Port = wrapped.getInt();
+        int index = 0;
+        MessageType = MessageType.GetMessageType(rawData[index++]);
+        
+        PackedData ipAddr = new PackedData(index, rawData);
+        IPAddress = ipAddr.Data;
+        index = ipAddr.NewIndex;
+        
+        byte[] port = Arrays.copyOfRange(rawData, index, index + 3);
+        Port = Constants.ByteToInt(port);
     }
 
     @Override

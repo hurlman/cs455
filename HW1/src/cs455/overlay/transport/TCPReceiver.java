@@ -1,5 +1,6 @@
 package cs455.overlay.transport;
 
+import cs455.overlay.wireformats.EventFactory;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -26,7 +27,8 @@ public class TCPReceiver extends Thread {
 				
 				byte[] data = new byte[dataLength];
 				din.readFully(data, 0, dataLength);
-				//TODO Event factory
+				
+                                EventFactory.getInstance().newMessage(data);
 			}
 			catch (SocketException se) {
 				System.out.println(se.getMessage());

@@ -5,29 +5,35 @@
  */
 package cs455.overlay.wireformats;
 
+import cs455.overlay.wireformats.Protocol.*;
+import java.io.*;
+
 /**
  *
  * @author Mike
  */
-public class OverlayNodeSendsDeregistration extends Protocol{
-    
+public class OverlayNodeSendsDeregistration implements Event {
+
     public byte[] IPAddress;
     public int Port;
-    
-    public OverlayNodeSendsDeregistration (){}
-    
-    public OverlayNodeSendsDeregistration(byte[] rawData){
-        ParseData(rawData);
+
+    private int type;
+
+    public OverlayNodeSendsDeregistration() {
+    }
+
+    public OverlayNodeSendsDeregistration(byte[] marshalledBytes) {
+
     }
 
     @Override
-    void ParseData(byte[] rawData) {
-        MessageType = MessageType.GetMessageType(rawData[0]);
+    public Protocol.MessageType getType() {
+        return MessageType.getMessageType(type);
     }
 
     @Override
-    byte[] BuildOutput() {
+    public byte[] getBytes() throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

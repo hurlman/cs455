@@ -7,10 +7,9 @@ package cs455.overlay.node;
 
 import java.net.*;
 import java.io.*;
-import cs455.overlay.*;
 import cs455.overlay.wireformats.*;
-import java.util.Map;
-import java.util.Scanner;
+import cs455.overlay.routing.*;
+import java.util.*;
 
 /**
  *
@@ -18,12 +17,18 @@ import java.util.Scanner;
  */
 public class Registry implements Node {
 
-    private static int Port;
-    private static int ID = 0;
-    private static Map<Integer, RegisteredNode> RegisteredNodes;
-	private static Scanner keyboard;
+    private  int Port;
+    private  int ID = 0;
+    private  Map<Integer, RoutingEntry> RegisteredNodes;
+    private  Scanner keyboard;
+    private  Socket ServerSocket;
+    private  EventFactory EF;
 
     public static void main(String[] args) {
+        new Registry().doMain(args);
+    }
+
+    public void doMain(String[] args) {
         try {
             Port = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
@@ -31,6 +36,9 @@ public class Registry implements Node {
             System.exit(0);
         }
         System.out.println("Starting registry.");
+
+        EF.subscribe(this);
+
         // Register nodes in separate thread to keep console alive.
         Thread registerThread = new Thread(() -> RegisterNodes());
         registerThread.start();
@@ -58,11 +66,11 @@ public class Registry implements Node {
                 System.out.println(String.format("Unknown command: %s", input));
             }
         }
-        
+
         // Overlay is now setup.  Begin taking new commands.
     }
 
-    private static void RegisterNodes() {
+    private void RegisterNodes() {
         try {
             ServerSocket listener = new ServerSocket(Port);
             System.out.println(String.format("Listening at %s on port %s.", InetAddress.getLocalHost(), Port));
@@ -82,7 +90,7 @@ public class Registry implements Node {
         System.out.println("Node registration complete.");
     }
 
-    private static void HandleNodeRegistration(Socket messageNodeSocket) {
+    private void HandleNodeRegistration(Socket messageNodeSocket) {
         try {
             System.out.println("Client has connected.");
             Thread currentThread = Thread.currentThread();
@@ -94,7 +102,7 @@ public class Registry implements Node {
             while (true) {
                 bytesread = inFromNode.read(buffer);
                 Constants.MessageType msgType = Constants.MessageType.GetMessageType(buffer[0]);
-                switch(msgType){
+                switch (msgType) {
                     case OVERLAY_NODE_SENDS_REGISTRATION:
                         OverlayNodeSendsRegistration nodeReg = new OverlayNodeSendsRegistration(buffer);
                         System.out.println(String.format("IP: %s, Port %s", nodeReg.IPAddress, nodeReg.Port));
@@ -105,8 +113,7 @@ public class Registry implements Node {
                     default:
                         System.out.println("Invalid message type received.");
                 }
-                
-                
+
             }
 
         } catch (IOException e) {
@@ -114,23 +121,23 @@ public class Registry implements Node {
         }
 
     }
-    
-    private static int GetID(){
+
+    private int GetID() {
         ID++;
         return ID;
     }
 
-    private static void ListNodes() {
+    private void ListNodes() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private static void SetupOverlay(int routingTableSize) {
+    private void SetupOverlay(int routingTableSize) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-	@Override
-	public void onEvent(Event message) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void onEvent(Event message) {
+        // TODO Auto-generated method stub
+
+    }
 }

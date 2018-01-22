@@ -4,40 +4,59 @@
  * and open the template in the editor.
  */
 package cs455.overlay.wireformats;
-import cs455.overlay.*;
-import java.util.Arrays;
+import cs455.overlay.wireformats.Protocol.*;
+import java.io.*;
 
 /**
  *
  * @author Mike
  */
-public class OverlayNodeSendsRegistration extends Protocol {
+public class OverlayNodeSendsRegistration implements Event {
 
     public byte[] IPAddress;
     public int Port;
     
-    public OverlayNodeSendsRegistration (byte[] rawData){
-        ParseData(rawData);
-    }
+    private int type;
     
     public OverlayNodeSendsRegistration(){}
     
-    @Override
-    void ParseData(byte[] rawData) {
-        int index = 0;
-        MessageType = MessageType.GetMessageType(rawData[index++]);
+    public OverlayNodeSendsRegistration (byte[] marshalledBytes) throws IOException{
+        ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
+        DataInputStream din = 
+                new DataInputStream(new BufferedInputStream(baInputStream));
         
-        PackedData ipAddr = new PackedData(index, rawData);
-        IPAddress = ipAddr.Data;
-        index = ipAddr.NewIndex;
+        type = din.readInt();
         
-        byte[] port = Arrays.copyOfRange(rawData, index, index + 3);
-        Port = Constants.ByteToInt(port);
+        int ipAddrLen = din.readInt();
+        IPAddress = new byte[ipAddrLen];
+        din.readFully(IPAddress);
+        
+        Port = din.readInt();
     }
 
     @Override
-    byte[] BuildOutput() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public MessageType getType() {
+        return MessageType.getMessageType(type);
+    }
+
+    @Override
+    public byte[] getBytes()throws IOException{
+        byte[] marshalledBytes = null;
+        ByteArrayOutputStream baOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dout = 
+                new DataOutputStream(new BufferedOutputStream(baOutputStream));
+        
+        dout.writeInt(type);
+        dout.writeInt(IPAddress.length);
+        dout.write(IPAddress);
+        dout.writeInt(Port);
+        
+        dout.flush();
+        marshalledBytes = baOutputStream.toByteArray();
+        
+        baOutputStream.close();
+        dout.close();
+        return marshalledBytes;
     }
     
 }

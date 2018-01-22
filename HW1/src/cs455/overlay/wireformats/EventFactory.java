@@ -1,36 +1,41 @@
 package cs455.overlay.wireformats;
 
-public enum EventFactory {
+import java.util.Observable;
+import cs455.overlay.node.Node;
+import cs455.overlay.wireformats.Protocol.*;
+import java.io.*;
 
-	OVERLAY_NODE_SENDS_REGISTRATION(2),
-	REGISTRY_REPORTS_REGISTRATION_STATUS(3),
-	OVERLAY_NODE_SENDS_DEREGISTRATION(4), 
-	REGISTRY_REPORTS_DEREGISTRATION_STATUS(5),
-	REGISTRY_SENDS_NODE_MANIFEST(6), 
-	NODE_REPORTS_OVERLAY_SETUP_STATUS(7),
-	REGISTRY_REQUESTS_TASK_INITIATE(8),
-	OVERLAY_NODE_SENDS_DATA(9),
-	OVERLAY_NODE_REPORTS_TASK_FINISHED(10),
-	REGISTRY_REQUESTS_TRAFFIC_SUMMARY(11),
-	OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY(12);
+public final class EventFactory extends Observable {
 
-	private int id;
+    private static final EventFactory INSTANCE = new EventFactory();
 
-	EventFactory(int i) {
-		id = i;
-	}
+    private EventFactory() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Already instantiated");
+        }
+    }
 
-	public int GetIntValue() {
-		return id;
-	}
+    public static EventFactory getInstance() {
+        return INSTANCE;
+    }
+    private Node Subscriber;
 
-	public static EventFactory getMessageType(int i) {
-		for (EventFactory a : EventFactory.values()) {
-			if (a.GetIntValue() == i) {
-				return a;
-			}
-		}
-		return null;
-	}
+    public void subscribe(Node subscriber) {
+        Subscriber = subscriber;
+    }
+    
+    public void newMessage(byte[] messageData) throws IOException{
+        ByteArrayInputStream baInputStream = 
+                new ByteArrayInputStream(messageData);
+        DataInputStream din = 
+                new DataInputStream(new BufferedInputStream(baInputStream));
+        
+        int type = din.readInt();
+        
+        switch(MessageType.getMessageType(type)){
+            case OVERLAY_NODE_SENDS_REGISTRATION:
+                Subscriber.onEvent(new OverlayNodeSendsRegistration(messageData));
+        }
+    }
 
 }

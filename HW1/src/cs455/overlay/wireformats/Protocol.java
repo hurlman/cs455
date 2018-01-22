@@ -6,19 +6,13 @@
 package cs455.overlay.wireformats;
 
 import cs455.overlay.*;
+
 /**
  *
  * @author Mike
  */
-public abstract class Protocol {
-    
-    // ParseData to always be called by constructor, when initialized with data.
-    // For use when receiving this message.
-    abstract void ParseData(byte[] rawData);
-    
-    // For use when generating this message to build the byte array to send.
-    abstract byte[] BuildOutput();
-    
+public class Protocol {
+
     public static int ByteToInt(byte[] bytes) {
         int i = 0;
         i |= bytes[0] & 0xFF;
@@ -28,15 +22,49 @@ public abstract class Protocol {
         i |= bytes[2] & 0xFF;
         return i;
     }
-    
-    public static byte[] IntToByte(int i){
+
+    public static byte[] IntToByte(int i) {
         byte[] bytes = new byte[3];
         bytes[0] = (byte) ((i >> 16) & 0xFF);
         bytes[1] = (byte) ((i >> 8) & 0xFF);
-        bytes[2] = (byte) (i  & 0xFF);
+        bytes[2] = (byte) (i & 0xFF);
         return bytes;
     }
 
-    public static final int BUFFER_SIZE = 1024;
-    
+    public static int BUFFER_SIZE = 1024;
+
+    public enum MessageType {
+
+        OVERLAY_NODE_SENDS_REGISTRATION(2),
+        REGISTRY_REPORTS_REGISTRATION_STATUS(3),
+        OVERLAY_NODE_SENDS_DEREGISTRATION(4),
+        REGISTRY_REPORTS_DEREGISTRATION_STATUS(5),
+        REGISTRY_SENDS_NODE_MANIFEST(6),
+        NODE_REPORTS_OVERLAY_SETUP_STATUS(7),
+        REGISTRY_REQUESTS_TASK_INITIATE(8),
+        OVERLAY_NODE_SENDS_DATA(9),
+        OVERLAY_NODE_REPORTS_TASK_FINISHED(10),
+        REGISTRY_REQUESTS_TRAFFIC_SUMMARY(11),
+        OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY(12);
+
+        private final int id;
+
+        MessageType(int i) {
+            id = i;
+        }
+
+        public int GetIntValue() {
+            return id;
+        }
+
+        public static MessageType getMessageType(int i) {
+            for (MessageType a : MessageType.values()) {
+                if (a.GetIntValue() == i) {
+                    return a;
+                }
+            }
+            return null;
+        }
+
+    }
 }

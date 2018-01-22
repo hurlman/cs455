@@ -1,7 +1,10 @@
 package cs455.overlay.wireformats;
 
-public interface Event {
-	EventFactory getType();
+import cs455.overlay.wireformats.Protocol.MessageType;
+import java.io.IOException;
 
-	byte[] getBytes();
+public interface Event {
+	MessageType getType();
+
+	byte[] getBytes() throws IOException;
 }

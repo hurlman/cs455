@@ -16,11 +16,12 @@ import java.util.Scanner;
  *
  * @author hurleym
  */
-public class Registry {
+public class Registry implements Node {
 
     private static int Port;
     private static int ID = 0;
     private static Map<Integer, RegisteredNode> RegisteredNodes;
+	private static Scanner keyboard;
 
     public static void main(String[] args) {
         try {
@@ -34,15 +35,9 @@ public class Registry {
         Thread registerThread = new Thread(() -> RegisterNodes());
         registerThread.start();
 
-        try {
-            // Short wait for listener to start before displaying console instructions.
-            Thread.sleep(100);
-        } catch (InterruptedException ex) {
-            System.out.println(ex.getMessage());
-        }
         System.out.println("'list-messaging-nodes' or 'l'");
         System.out.println("'setup-overlay #' or 's #'  (e.g. s 3)");
-        Scanner keyboard = new Scanner(System.in);
+        keyboard = new Scanner(System.in);
         while (true) {
             String input = keyboard.nextLine();
             if (input.equals("l") || input.equals("list-messaging-nodes")) {
@@ -132,4 +127,10 @@ public class Registry {
     private static void SetupOverlay(int routingTableSize) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+	@Override
+	public void onEvent(Event message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

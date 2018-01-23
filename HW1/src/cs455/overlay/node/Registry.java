@@ -7,22 +7,25 @@ package cs455.overlay.node;
 
 import java.net.*;
 import java.io.*;
-import cs455.overlay.wireformats.*;
-import cs455.overlay.routing.*;
 import java.util.*;
 
+import cs455.overlay.transport.TCPConnection;
+import cs455.overlay.wireformats.*;
+import cs455.overlay.routing.*;
+
+
 /**
- *
  * @author hurleym
  */
 public class Registry implements Node {
 
-    private  int Port;
-    private  int ID = 0;
-    private  Map<Integer, RoutingEntry> RegisteredNodes;
-    private  Scanner keyboard;
-    private  Socket ServerSocket;
-    private  EventFactory EF;
+    private int Port;
+    private int ID = 0;
+    private Map<Integer, RoutingEntry> RegisteredNodes;
+    private Scanner keyboard;
+    private ServerSocket serverSocket;
+    private EventFactory EF;
+    private List<TCPConnection> TCPConnectionCache = new ArrayList<>();
 
     public static void main(String[] args) {
         new Registry().doMain(args);
@@ -31,17 +34,24 @@ public class Registry implements Node {
     public void doMain(String[] args) {
         try {
             Port = Integer.parseInt(args[0]);
+            System.out.println("Starting registry.");
+
+            serverSocket = new ServerSocket(Port);
+
+            System.out.println(String.format("Listening at %s on port %s.", InetAddress.getLocalHost(), Port));
+            System.out.println("Awaiting messaging node registration.");
+        } catch (IOException e) {
+            System.out.println(String.format("Unable to open server socket on port %s. %s", Port, e.getMessage()));
+            System.exit(0);
         } catch (NumberFormatException e) {
             System.out.println(String.format("%s is not a valid integer.", args[0]));
             System.exit(0);
         }
-        System.out.println("Starting registry.");
 
+        EF = EventFactory.getInstance();
         EF.subscribe(this);
 
-        // Register nodes in separate thread to keep console alive.
-        Thread registerThread = new Thread(() -> RegisterNodes());
-        registerThread.start();
+        new Thread(this::AcceptConnections).start();
 
         System.out.println("'list-messaging-nodes' or 'l'");
         System.out.println("'setup-overlay #' or 's #'  (e.g. s 3)");
@@ -59,7 +69,6 @@ public class Registry implements Node {
                     continue;
                 }
                 // Stop registering nodes and create the overlay.
-                registerThread.interrupt();
                 SetupOverlay(routingTableSize);
                 break;
             } else {
@@ -70,56 +79,16 @@ public class Registry implements Node {
         // Overlay is now setup.  Begin taking new commands.
     }
 
-    private void RegisterNodes() {
+    private void AcceptConnections() {
         try {
-            ServerSocket listener = new ServerSocket(Port);
-            System.out.println(String.format("Listening at %s on port %s.", InetAddress.getLocalHost(), Port));
-            System.out.println("Awaiting messaging node registration.");
-
-            while (!Thread.currentThread().isInterrupted()) {
-                Socket nodeSocket = listener.accept();
-                new Thread(() -> HandleNodeRegistration(nodeSocket)).start();
-            }
-        } catch (IOException e) {
-            System.out.println(String.format("Unable to open server socket on port %s. %s", Port, e.getMessage()));
-            System.exit(0);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.exit(0);
-        }
-        System.out.println("Node registration complete.");
-    }
-
-    private void HandleNodeRegistration(Socket messageNodeSocket) {
-        try {
-            System.out.println("Client has connected.");
-            Thread currentThread = Thread.currentThread();
-            DataInputStream inFromNode = new DataInputStream(messageNodeSocket.getInputStream());
-            DataOutputStream outToNode = new DataOutputStream(messageNodeSocket.getOutputStream());
-
-            byte[] buffer = new byte[Constants.BUFFER_SIZE];
-            int bytesread;
             while (true) {
-                bytesread = inFromNode.read(buffer);
-                Constants.MessageType msgType = Constants.MessageType.GetMessageType(buffer[0]);
-                switch (msgType) {
-                    case OVERLAY_NODE_SENDS_REGISTRATION:
-                        OverlayNodeSendsRegistration nodeReg = new OverlayNodeSendsRegistration(buffer);
-                        System.out.println(String.format("IP: %s, Port %s", nodeReg.IPAddress, nodeReg.Port));
-                        break;
-                    case OVERLAY_NODE_SENDS_DEREGISTRATION:
-                        OverlayNodeSendsDeregistration nodeDereg = new OverlayNodeSendsDeregistration(buffer);
-                        break;
-                    default:
-                        System.out.println("Invalid message type received.");
-                }
-
+                Socket newSocket = serverSocket.accept();
+                TCPConnectionCache.add(new TCPConnection(newSocket));
+                System.out.println("Client has connected.");
             }
-
         } catch (IOException e) {
-            System.out.println(String.format("Client has disconnected."));
+            System.out.println(String.format("Error on client connection. %s.", e.getMessage()));
         }
-
     }
 
     private int GetID() {
@@ -136,8 +105,40 @@ public class Registry implements Node {
     }
 
     @Override
-    public void onEvent(Event message) {
-        // TODO Auto-generated method stub
+    public void onEvent(Event message, InetAddress origin) {
+        switch (message.getType()) {
+            case OVERLAY_NODE_SENDS_REGISTRATION:
+                RegisterNode((OverlayNodeSendsRegistration) message, origin);
+                break;
+            case REGISTRY_REPORTS_REGISTRATION_STATUS:
+                break;
+            case OVERLAY_NODE_SENDS_DEREGISTRATION:
+                DeregisterNode((OverlayNodeSendsDeregistration) message, origin);
+            case REGISTRY_REPORTS_DEREGISTRATION_STATUS:
+                break;
+            case REGISTRY_SENDS_NODE_MANIFEST:
+                break;
+            case NODE_REPORTS_OVERLAY_SETUP_STATUS:
+                break;
+            case REGISTRY_REQUESTS_TASK_INITIATE:
+                break;
+            case OVERLAY_NODE_SENDS_DATA:
+                break;
+            case OVERLAY_NODE_REPORTS_TASK_FINISHED:
+                break;
+            case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
+                break;
+            case OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY:
+                break;
+        }
 
+    }
+
+    private void DeregisterNode(OverlayNodeSendsDeregistration dereg, InetAddress origin) {
+
+    }
+
+    private void RegisterNode(OverlayNodeSendsRegistration reg, InetAddress origin) {
+        System.out.println(String.format("Registration from %s.  Listening on port %s", origin.getHostAddress(), reg.Port));
     }
 }

@@ -12,10 +12,12 @@ public class TCPConnection {
 		
 		Sender = new TCPSender(socket);
 		Receiver = new TCPReceiver(socket);
+		Sender.start();
 		Receiver.start();
 	}
+	//TODO Something causing null on disconnect.
 	
-	public void sendData(byte[] dataToWrite) throws IOException {
+	public void sendData(byte[] dataToWrite) {
 		Sender.outQueue.add(dataToWrite);
 	}
 }

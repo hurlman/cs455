@@ -9,14 +9,11 @@ import java.util.List;
 
 public class TCPSender extends Thread {
 
-	private Socket socket;
 	private DataOutputStream dout;
-	public List<byte[]> outQueue;
+	public List<byte[]> outQueue = new ArrayList<>();
 	
 	public TCPSender(Socket socket) throws IOException {
-		this.socket = socket;
 		dout = new DataOutputStream(socket.getOutputStream());
-		outQueue = new ArrayList<byte[]>();
 	}
 	
 	private void sendData(byte[] dataToSend) throws IOException {

@@ -18,16 +18,18 @@ public class OverlayNodeSendsRegistration implements Event {
     
     private int type;
     
-    public OverlayNodeSendsRegistration(){}
+    public OverlayNodeSendsRegistration(){
+        type = MessageType.OVERLAY_NODE_SENDS_REGISTRATION.GetIntValue();
+    }
     
     public OverlayNodeSendsRegistration (byte[] marshalledBytes) throws IOException{
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream din = 
                 new DataInputStream(new BufferedInputStream(baInputStream));
         
-        type = din.readInt();
+        type = din.readByte(); // redundant?
         
-        int ipAddrLen = din.readInt();
+        int ipAddrLen = din.readByte();
         IPAddress = new byte[ipAddrLen];
         din.readFully(IPAddress);
         
@@ -46,8 +48,8 @@ public class OverlayNodeSendsRegistration implements Event {
         DataOutputStream dout = 
                 new DataOutputStream(new BufferedOutputStream(baOutputStream));
         
-        dout.writeInt(type);
-        dout.writeInt(IPAddress.length);
+        dout.writeByte(type);
+        dout.writeByte(IPAddress.length);
         dout.write(IPAddress);
         dout.writeInt(Port);
         

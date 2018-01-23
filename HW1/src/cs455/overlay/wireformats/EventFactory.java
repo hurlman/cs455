@@ -1,5 +1,6 @@
 package cs455.overlay.wireformats;
 
+import java.net.InetAddress;
 import java.util.Observable;
 import cs455.overlay.node.Node;
 import cs455.overlay.wireformats.Protocol.*;
@@ -24,17 +25,17 @@ public final class EventFactory extends Observable {
         Subscriber = subscriber;
     }
     
-    public void newMessage(byte[] messageData) throws IOException{
+    public void newMessage(byte[] messageData, InetAddress origin) throws IOException{
         ByteArrayInputStream baInputStream = 
                 new ByteArrayInputStream(messageData);
         DataInputStream din = 
                 new DataInputStream(new BufferedInputStream(baInputStream));
         
-        int type = din.readInt();
+        int type = din.readByte();
         
         switch(MessageType.getMessageType(type)){
             case OVERLAY_NODE_SENDS_REGISTRATION:
-                Subscriber.onEvent(new OverlayNodeSendsRegistration(messageData));
+                Subscriber.onEvent(new OverlayNodeSendsRegistration(messageData), origin);
         }
     }
 

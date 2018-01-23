@@ -22,7 +22,7 @@ public class OverlayNodeSendsDeregistration implements Event {
     public OverlayNodeSendsDeregistration() {
     }
 
-    public OverlayNodeSendsDeregistration(byte[] marshalledBytes) {
+    public OverlayNodeSendsDeregistration(byte[] marshalledBytes) throws IOException{
 
     }
 

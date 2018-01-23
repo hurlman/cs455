@@ -10,6 +10,8 @@ import java.io.*;
 import java.util.*;
 
 import cs455.overlay.transport.TCPConnection;
+import cs455.overlay.transport.TCPConnectionCache;
+import cs455.overlay.util.InteractiveCommandParser;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.routing.*;
 
@@ -25,18 +27,24 @@ public class Registry implements Node {
     private Scanner keyboard;
     private ServerSocket serverSocket;
     private EventFactory EF;
-    private List<TCPConnection> TCPConnectionCache = new ArrayList<>();
+    private TCPConnectionCache tcpCache;
 
     public static void main(String[] args) {
         new Registry().doMain(args);
     }
 
-    public void doMain(String[] args) {
+    private void doMain(String[] args) {
         try {
             Port = Integer.parseInt(args[0]);
             System.out.println("Starting registry.");
 
             serverSocket = new ServerSocket(Port);
+            tcpCache = new TCPConnectionCache(serverSocket);
+
+            EF = EventFactory.getInstance();
+            EF.subscribe(this);
+
+            new InteractiveCommandParser(this).start();
 
             System.out.println(String.format("Listening at %s on port %s.", InetAddress.getLocalHost(), Port));
             System.out.println("Awaiting messaging node registration.");
@@ -46,48 +54,6 @@ public class Registry implements Node {
         } catch (NumberFormatException e) {
             System.out.println(String.format("%s is not a valid integer.", args[0]));
             System.exit(0);
-        }
-
-        EF = EventFactory.getInstance();
-        EF.subscribe(this);
-
-        new Thread(this::AcceptConnections).start();
-
-        System.out.println("'list-messaging-nodes' or 'l'");
-        System.out.println("'setup-overlay #' or 's #'  (e.g. s 3)");
-        keyboard = new Scanner(System.in);
-        while (true) {
-            String input = keyboard.nextLine();
-            if (input.equals("l") || input.equals("list-messaging-nodes")) {
-                ListNodes();
-            } else if (input.startsWith("s ") || input.startsWith("setup-overlay ")) {
-                int routingTableSize;
-                try {
-                    routingTableSize = Integer.parseInt(input.substring(input.lastIndexOf(" ") + 1));
-                } catch (NumberFormatException e) {
-                    System.out.println(String.format("%s is not a valid integer.", input.substring(input.lastIndexOf(" ") + 1)));
-                    continue;
-                }
-                // Stop registering nodes and create the overlay.
-                SetupOverlay(routingTableSize);
-                break;
-            } else {
-                System.out.println(String.format("Unknown command: %s", input));
-            }
-        }
-
-        // Overlay is now setup.  Begin taking new commands.
-    }
-
-    private void AcceptConnections() {
-        try {
-            while (true) {
-                Socket newSocket = serverSocket.accept();
-                TCPConnectionCache.add(new TCPConnection(newSocket));
-                System.out.println("Client has connected.");
-            }
-        } catch (IOException e) {
-            System.out.println(String.format("Error on client connection. %s.", e.getMessage()));
         }
     }
 
@@ -110,28 +76,32 @@ public class Registry implements Node {
             case OVERLAY_NODE_SENDS_REGISTRATION:
                 RegisterNode((OverlayNodeSendsRegistration) message, origin);
                 break;
-            case REGISTRY_REPORTS_REGISTRATION_STATUS:
-                break;
             case OVERLAY_NODE_SENDS_DEREGISTRATION:
                 DeregisterNode((OverlayNodeSendsDeregistration) message, origin);
-            case REGISTRY_REPORTS_DEREGISTRATION_STATUS:
-                break;
-            case REGISTRY_SENDS_NODE_MANIFEST:
                 break;
             case NODE_REPORTS_OVERLAY_SETUP_STATUS:
                 break;
-            case REGISTRY_REQUESTS_TASK_INITIATE:
-                break;
-            case OVERLAY_NODE_SENDS_DATA:
-                break;
             case OVERLAY_NODE_REPORTS_TASK_FINISHED:
-                break;
-            case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
                 break;
             case OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY:
                 break;
+            default:
+                break;
         }
+    }
 
+    @Override
+    public void onCommand(InteractiveCommandParser.Command command, int arg) {
+        switch (command) {
+            case LIST_MESSAGING_NODES:
+                ListNodes();
+                break;
+            case SETUP_OVERLAY:
+                SetupOverlay(arg);
+                break;
+            default:
+                break;
+        }
     }
 
     private void DeregisterNode(OverlayNodeSendsDeregistration dereg, InetAddress origin) {

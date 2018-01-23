@@ -30,11 +30,8 @@ public class TCPReceiver extends Thread {
                 din.readFully(data, 0, dataLength);
 
                 EventFactory.getInstance().newMessage(data, socket.getInetAddress());
-            } catch (SocketException se) {
-                System.out.println(se.getMessage());
-                break;
             } catch (IOException ioe) {
-                System.out.println(ioe.getMessage());
+                System.out.println("Socket closed " + ioe.getMessage());
                 break;
             }
         }

@@ -5,17 +5,16 @@ import cs455.overlay.wireformats.EventFactory;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TCPReceiver extends Thread {
 
     private Socket socket;
     private DataInputStream din;
+    private TCPConnection tcpConnection;
 
-    public TCPReceiver(Socket socket) throws IOException {
+    public TCPReceiver(Socket socket, TCPConnection tcpConnection) throws IOException {
         this.socket = socket;
+        this.tcpConnection = tcpConnection;
         din = new DataInputStream(socket.getInputStream());
     }
 
@@ -29,7 +28,7 @@ public class TCPReceiver extends Thread {
                 byte[] data = new byte[dataLength];
                 din.readFully(data, 0, dataLength);
 
-                EventFactory.getInstance().newMessage(data, socket.getInetAddress());
+                EventFactory.getInstance().newMessage(data, tcpConnection);
             } catch (IOException ioe) {
                 System.out.println("Socket closed " + ioe.getMessage());
                 break;

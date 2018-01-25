@@ -3,12 +3,14 @@ package cs455.overlay.util;
 
 import cs455.overlay.node.Node;
 
-import java.util.Scanner;
-
 public class InteractiveCommandParser extends Thread {
     public enum Command {
-        LIST_MESSAGING_NODES("l", "list-messaging-nodes"),
-        SETUP_OVERLAY("s", "setup-overlay"),
+        LIST_MESSAGING_NODES("n", "list-messaging-nodes"),
+        SETUP_OVERLAY("o", "setup-overlay"),
+        LIST_ROUTING_TABLES("r","list-routing-tables"),
+        START("s","start"),
+        PRINT_COUNTERS_AND_DIAGNOSTICS("p","print-counters-and-diagnostics"),
+        EXIT_OVERLAY("d","exit-overlay"),
         UNKNOWN("","");
 
         private final String longCommand;
@@ -36,16 +38,16 @@ public class InteractiveCommandParser extends Thread {
     }
 
     public void run(){
-        Scanner keyboard = new Scanner(System.in);
         while(true){
-            String[] inputs = keyboard.nextLine().split(" ");
+            String[] inputs = System.console().readLine().split("\\s+");
             int arg = -1;
             if (inputs.length > 1){
                 try{
                     arg = Integer.parseInt(inputs[1]);
                 }
                 catch (NumberFormatException e){
-                    System.out.println("Invalid command. " + e.getMessage());
+                    System.out.println(String.format("%s is not a valid integer", inputs[1]));
+                    continue;
                 }
             }
             Command cmd = Command.getCommand(inputs[0]);
@@ -55,6 +57,18 @@ public class InteractiveCommandParser extends Thread {
                     break;
                 case SETUP_OVERLAY:
                     Subscriber.onCommand(cmd, arg);
+                    break;
+                case LIST_ROUTING_TABLES:
+                    Subscriber.onCommand(cmd, -1);
+                    break;
+                case START:
+                    Subscriber.onCommand(cmd, arg);
+                    break;
+                case PRINT_COUNTERS_AND_DIAGNOSTICS:
+                    Subscriber.onCommand(cmd, -1);
+                    break;
+                case EXIT_OVERLAY:
+                    Subscriber.onCommand(cmd, -1);
                     break;
                 case UNKNOWN:
                     System.out.println("Unknown command.");

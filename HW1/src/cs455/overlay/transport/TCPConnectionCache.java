@@ -8,8 +8,10 @@ public class TCPConnectionCache {
     private ServerSocket serverSocket;
     private List<TCPConnection> InboundConnections = new ArrayList<>();
 
+    // Used by overlay nodes only.
     private TCPConnection RegistryConnection;
 
+    // Immediately begin accepting connections.
     public TCPConnectionCache(ServerSocket socket) {
         serverSocket = socket;
         new Thread(this::AcceptConnections).start();
@@ -28,7 +30,6 @@ public class TCPConnectionCache {
             while (true) {
                 Socket newSocket = serverSocket.accept();
                 InboundConnections.add(new TCPConnection(newSocket));
-                System.out.println("Client has connected.");
             }
         } catch (IOException e) {
             System.out.println(String.format("Error on client connection. %s.", e.getMessage()));

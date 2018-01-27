@@ -77,6 +77,21 @@ public class Registry implements Node {
         }
     }
 
+    private void ListRoutes(){
+        System.out.print("Routing Tables:\n\n");
+        for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
+            System.out.println(String.format("ID: %s, IPAddr: %s, Port %s",
+                    re.getKey(),
+                    re.getValue().tcpConnection.getRemoteIP().getHostAddress(),
+                    re.getValue().Port));
+            System.out.print("Table: ");
+            for(RoutingEntry e : overlay.getRoutingTable(re.getKey())){
+                System.out.print(e.ID + ", ");
+            }
+            System.out.print("\b\b \n\n\n");
+        }
+    }
+
     private void SetupOverlay(int routingTableSize) {
         if (routingTableSize < 0) {
             System.out.println("Routing table size must be specified.");
@@ -119,6 +134,9 @@ public class Registry implements Node {
                 break;
             case SETUP_OVERLAY:
                 SetupOverlay(arg);
+                break;
+            case LIST_ROUTING_TABLES:
+                ListRoutes();
                 break;
             default:
                 System.out.println("Invalid command for Registry.");

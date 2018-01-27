@@ -24,8 +24,8 @@ public class Registry implements Node {
     private int ID = 0;
     private Map<Integer, RoutingEntry> RegisteredNodes = new HashMap<>();
     private ServerSocket serverSocket;
-    private EventFactory EF;
     private TCPConnectionCache tcpCache;
+    private cs455.overlay.routing.Overlay overlay;
 
     public static void main(String[] args) {
         new Registry().doMain(args);
@@ -83,8 +83,10 @@ public class Registry implements Node {
         } else if (routingTableSize < 2 || routingTableSize > 4) {
             System.out.println(routingTableSize + " is an invalid routing table size.");
         } else {
-            System.out.println("Here is an overlay. RT size: " + routingTableSize);
-            //TODO lots here
+            System.out.println("Registration ended. Setting up overlay. RT size: " + routingTableSize);
+
+            overlay = new Overlay(RegisteredNodes, routingTableSize);
+
         }
     }
 
@@ -167,6 +169,7 @@ public class Registry implements Node {
                     origin.getRemoteIP().getHostAddress(), reg.Port));
         } else {
             int id = GetID();
+            re.ID = id;
             RegisteredNodes.put(id, re);
             String message = String.format("Registration request successful. The number of " +
                     "messaging nodes currently constituting the overlay is (%s).", RegisteredNodes.size());

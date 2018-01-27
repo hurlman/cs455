@@ -27,12 +27,8 @@ public final class EventFactory extends Observable {
     }
     
     public void newMessage(byte[] messageData, TCPConnection origin) throws IOException{
-        ByteArrayInputStream baInputStream = 
-                new ByteArrayInputStream(messageData);
-        DataInputStream din = 
-                new DataInputStream(new BufferedInputStream(baInputStream));
-        
-        int type = din.readByte();
+
+        int type = messageData[0];
         
         switch(MessageType.getMessageType(type)){
             case OVERLAY_NODE_SENDS_REGISTRATION:
@@ -47,6 +43,8 @@ public final class EventFactory extends Observable {
             case REGISTRY_REPORTS_DEREGISTRATION_STATUS:
                 Subscriber.onEvent(new RegistryReportsDeregistrationStatus(messageData), origin);
                 break;
+            case REGISTRY_SENDS_NODE_MANIFEST:
+                Subscriber.onEvent(new RegistrySendsNodeManifest(messageData), origin);
         }
     }
 

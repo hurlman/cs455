@@ -11,12 +11,17 @@ public class RoutingEntry {
     public TCPConnection tcpConnection;
     public byte[] IPAddress;
     public int Port;
-    public RoutingTable routingTable;
+    public int ID;
 
     public RoutingEntry(TCPConnection tcpConnection, byte[] IPAddress, int port) {
         this.tcpConnection = tcpConnection;
         this.IPAddress = IPAddress;
         Port = port;
+    }
+    public RoutingEntry(byte[] IPAddress, int port, int id) {
+        this.IPAddress = IPAddress;
+        Port = port;
+        ID = id;
     }
 
     // Overriding equality comparison to determine IP/Port registration

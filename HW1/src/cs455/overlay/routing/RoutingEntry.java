@@ -12,6 +12,7 @@ public class RoutingEntry {
     public byte[] IPAddress;
     public int Port;
     public int ID;
+    public boolean OverlayConnectionsMade = false;
 
     public RoutingEntry(TCPConnection tcpConnection, byte[] IPAddress, int port) {
         this.tcpConnection = tcpConnection;

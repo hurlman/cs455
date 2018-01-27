@@ -6,7 +6,6 @@ public class Overlay {
     private Map<Integer, RoutingEntry> nodes;
     private int RoutingTableSize;
     private Map<Integer, List<RoutingEntry>> routes = new HashMap<>();
-    private List<NodeConnection> nodeConnections = new ArrayList<>();
 
     public Overlay(Map<Integer, RoutingEntry> registeredNodes, int routingTableSize) {
         nodes = registeredNodes;
@@ -25,7 +24,6 @@ public class Overlay {
                 List<RoutingEntry> currentRoute = routes.get(nodeList[i]);
                 currentRoute.add(nodes.get(nodeList[newDest]));
                 routes.put(nodeList[i], currentRoute);
-                nodeConnections.add(new NodeConnection(i, newDest));
             }
         }
     }
@@ -35,43 +33,9 @@ public class Overlay {
     }
 
     public boolean connectionsComplete() {
-        for (NodeConnection b : nodeConnections) {
-            if (!b.established) return false;
+        for (RoutingEntry node : nodes.values()) {
+            if (!node.OverlayConnectionsMade) return false;
         }
         return true;
-    }
-
-    public void connectionMade(int src, int dst) {
-        NodeConnection newConnection = new NodeConnection(src, dst);
-        for (NodeConnection nc : nodeConnections) {
-            if (nc.equals(newConnection)) nc.established = true;
-        }
-    }
-
-    class NodeConnection {
-        public int src;
-        public int dst;
-        public boolean established;
-
-        public NodeConnection(int src, int dst) {
-            this.src = src;
-            this.dst = dst;
-            established = false;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            NodeConnection that = (NodeConnection) o;
-            return src == that.src &&
-                    dst == that.dst;
-        }
-
-        @Override
-        public int hashCode() {
-
-            return Objects.hash(src, dst);
-        }
     }
 }

@@ -85,8 +85,8 @@ public class Registry implements Node {
                     re.getValue().tcpConnection.getRemoteIP().getHostAddress(),
                     re.getValue().Port));
             System.out.print("Table: ");
-            for(RoutingEntry e : overlay.getRoutingTable(re.getKey())){
-                System.out.print(e.ID + ", ");
+            for(Integer e : overlay.getRoutingTable(re.getKey())){
+                System.out.print(e + ", ");
             }
             System.out.print("\b\b \n\n\n");
         }

@@ -5,7 +5,8 @@ import java.util.*;
 public class Overlay {
     private Map<Integer, RoutingEntry> nodes;
     private int RoutingTableSize;
-    private Map<Integer, List<Integer>> routes = new HashMap<>();
+    private Map<Integer, List<RoutingEntry>> routes = new HashMap<>();
+    private int[] nodeList;
 
     public Overlay(Map<Integer, RoutingEntry> registeredNodes, int routingTableSize) {
         nodes = registeredNodes;
@@ -14,8 +15,8 @@ public class Overlay {
     }
 
     private void setupOverlay() {
-        int[] nodeList = nodes.keySet().stream().mapToInt(Number::intValue).toArray();
-        List<Integer> currentRoute;
+        nodeList = nodes.keySet().stream().mapToInt(Number::intValue).toArray();
+        List<RoutingEntry> currentRoute;
         Arrays.sort(nodeList);
         for (int i = 0; i < nodeList.length; i++) {
             routes.put(nodeList[i], new ArrayList<>());
@@ -23,14 +24,18 @@ public class Overlay {
                 int hops = i + (int) Math.pow(2, j - 1);
                 int newDest = hops >= nodeList.length ? hops - nodeList.length : hops;
                 currentRoute = routes.get(nodeList[i]);
-                currentRoute.add(newDest);
+                currentRoute.add(nodes.get(nodeList[newDest]));
                 routes.put(nodeList[i], currentRoute);
             }
         }
     }
 
-    public List<Integer> getRoutingTable(int ID) {
+    public List<RoutingEntry> getRoutingTable(int ID) {
         return routes.get(ID);
+    }
+
+    public int[] getOrderedNodeList(){
+        return nodeList;
     }
 
     public boolean connectionsComplete() {

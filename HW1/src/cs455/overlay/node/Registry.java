@@ -59,7 +59,7 @@ public class Registry implements Node {
         }
     }
 
-    private int GetID() {
+    private synchronized int GetID() {
         if (ID > 127) {
             System.out.println("Too many nodes have registered. Max is 128. Exiting.");
             System.exit(0);
@@ -85,8 +85,8 @@ public class Registry implements Node {
                     re.getValue().tcpConnection.getRemoteIP().getHostAddress(),
                     re.getValue().Port));
             System.out.print("Table: ");
-            for(Integer e : overlay.getRoutingTable(re.getKey())){
-                System.out.print(e + ", ");
+            for(RoutingEntry e : overlay.getRoutingTable(re.getKey())){
+                System.out.print(e.ID + ", ");
             }
             System.out.print("\b\b \n\n\n");
         }
@@ -99,10 +99,19 @@ public class Registry implements Node {
             System.out.println(routingTableSize + " is an invalid routing table size.");
         } else {
             System.out.println("Registration ended. Setting up overlay. RT size: " + routingTableSize);
-
             overlay = new Overlay(RegisteredNodes, routingTableSize);
 
+            System.out.println("Overlay setup complete.  Sending node manifests.");
+            for(Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()){
+                SendNodeManifest(re.getValue(),
+                        overlay.getRoutingTable(re.getKey()),
+                        overlay.getOrderedNodeList());
+            }
         }
+    }
+
+    private void SendNodeManifest(RoutingEntry re, List<RoutingEntry> routingTable, int[] orderedNodeList) {
+
     }
 
     @Override

@@ -8,11 +8,12 @@ import java.util.*;
 public class RegistrySendsNodeManifest implements Event {
 
     private int type;
-    public List<RoutingEntry> NodeRoutingTable = new ArrayList<>();
-    public int[] allNodes;
+    private List<RoutingEntry> NodeRoutingTable = new ArrayList<>();
+    private int[] orderedNodeList;
 
-    public RegistrySendsNodeManifest() {
+    public RegistrySendsNodeManifest(int[] orderedNodeList) {
         type = Protocol.MessageType.REGISTRY_SENDS_NODE_MANIFEST.GetIntValue();
+        this.orderedNodeList = orderedNodeList;
     }
 
     public RegistrySendsNodeManifest(byte[] marshalledBytes) throws IOException {
@@ -32,12 +33,16 @@ public class RegistrySendsNodeManifest implements Event {
             NodeRoutingTable.add(new RoutingEntry(ipAddr, port, nodeID));
         }
         int nodeCount = din.readByte();
-        allNodes = new int[nodeCount];
+        orderedNodeList = new int[nodeCount];
         byte[] bNodes = new byte[nodeCount];
         din.readFully(bNodes);
         for (int i = 0; i < nodeCount; i++) {
-            allNodes[i] = bNodes[i];
+            orderedNodeList[i] = bNodes[i];
         }
+    }
+
+    public void addRoute(RoutingEntry re){
+        NodeRoutingTable.add(re);
     }
 
     @Override
@@ -60,10 +65,10 @@ public class RegistrySendsNodeManifest implements Event {
             dout.write(re.IPAddress);
             dout.writeInt(re.Port);
         }
-        int nodeCount = allNodes.length;
+        int nodeCount = orderedNodeList.length;
         byte[] bNodes = new byte[nodeCount];
         for (int i = 0; i < nodeCount; i++) {
-            bNodes[i] = (byte) allNodes[i];
+            bNodes[i] = (byte) orderedNodeList[i];
         }
         dout.writeByte(nodeCount);
         dout.write(bNodes);

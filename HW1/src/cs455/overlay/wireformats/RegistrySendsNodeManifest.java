@@ -8,12 +8,11 @@ import java.util.*;
 public class RegistrySendsNodeManifest implements Event {
 
     private int type;
-    private List<RoutingEntry> NodeRoutingTable = new ArrayList<>();
-    private int[] orderedNodeList;
+    public List<RoutingEntry> NodeRoutingTable;
+    public int[] orderedNodeList;
 
-    public RegistrySendsNodeManifest(int[] orderedNodeList) {
+    public RegistrySendsNodeManifest() {
         type = Protocol.MessageType.REGISTRY_SENDS_NODE_MANIFEST.GetIntValue();
-        this.orderedNodeList = orderedNodeList;
     }
 
     public RegistrySendsNodeManifest(byte[] marshalledBytes) throws IOException {
@@ -39,10 +38,6 @@ public class RegistrySendsNodeManifest implements Event {
         for (int i = 0; i < nodeCount; i++) {
             orderedNodeList[i] = bNodes[i];
         }
-    }
-
-    public void addRoute(RoutingEntry re){
-        NodeRoutingTable.add(re);
     }
 
     @Override

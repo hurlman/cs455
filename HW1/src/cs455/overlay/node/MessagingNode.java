@@ -5,6 +5,7 @@
  */
 package cs455.overlay.node;
 
+import cs455.overlay.routing.RoutingTable;
 import cs455.overlay.transport.TCPConnection;
 import cs455.overlay.transport.TCPConnectionCache;
 import cs455.overlay.util.InteractiveCommandParser;
@@ -26,6 +27,7 @@ public class MessagingNode implements Node {
     private int Port;
     private TCPConnectionCache tcpCache;
     private int ID;
+    private RoutingTable routingTable;
 
     public static void main(String[] args) {
         new MessagingNode().doMain(args);
@@ -84,6 +86,7 @@ public class MessagingNode implements Node {
                 HandleDeregistrationStatus((RegistryReportsDeregistrationStatus) message, origin);
                 break;
             case REGISTRY_SENDS_NODE_MANIFEST:
+                CreateRoutingTable((RegistrySendsNodeManifest) message, origin);
                 break;
             case REGISTRY_REQUESTS_TASK_INITIATE:
                 break;
@@ -97,8 +100,13 @@ public class MessagingNode implements Node {
         }
     }
 
+    private void CreateRoutingTable(RegistrySendsNodeManifest message, TCPConnection origin) {
+        routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList);
+    }
+
     private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message, TCPConnection origin) {
         System.out.println(message.Message);
+        //TODO Exit here??
     }
 
     private void HandleRegistrationStatus(RegistryReportsRegistrationStatus message, TCPConnection origin) {

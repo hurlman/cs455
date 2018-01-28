@@ -77,7 +77,7 @@ public class Registry implements Node {
         }
     }
 
-    private void ListRoutes(){
+    private void ListRoutes() {
         System.out.print("Routing Tables:\n\n");
         for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
             System.out.println(String.format("ID: %s, IPAddr: %s, Port %s",
@@ -85,7 +85,7 @@ public class Registry implements Node {
                     re.getValue().tcpConnection.getRemoteIP().getHostAddress(),
                     re.getValue().Port));
             System.out.print("Table: ");
-            for(RoutingEntry e : overlay.getRoutingTable(re.getKey())){
+            for (RoutingEntry e : overlay.getRoutingTable(re.getKey())) {
                 System.out.print(e.ID + ", ");
             }
             System.out.print("\b\b \n\n\n");
@@ -102,7 +102,7 @@ public class Registry implements Node {
             overlay = new Overlay(RegisteredNodes, routingTableSize);
 
             System.out.println("Overlay setup complete.  Sending node manifests.");
-            for(Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()){
+            for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
                 SendNodeManifest(re.getValue(),
                         overlay.getRoutingTable(re.getKey()),
                         overlay.getOrderedNodeList());
@@ -111,7 +111,16 @@ public class Registry implements Node {
     }
 
     private void SendNodeManifest(RoutingEntry re, List<RoutingEntry> routingTable, int[] orderedNodeList) {
+        RegistrySendsNodeManifest manifestMessage = new RegistrySendsNodeManifest();
+        manifestMessage.NodeRoutingTable = routingTable;
+        manifestMessage.orderedNodeList = orderedNodeList;
 
+        try {
+            System.out.println(String.format("Sending manifest to node %s.", re.ID));
+            re.tcpConnection.sendData(manifestMessage.getBytes());
+        } catch (IOException e) {
+            System.out.println(String.format("Error sending manifest to node %s. %s", re.ID, e.getMessage()));
+        }
     }
 
     @Override
@@ -153,7 +162,7 @@ public class Registry implements Node {
         }
     }
 
-    private void DeregisterNode(OverlayNodeSendsDeregistration dereg, TCPConnection origin) {
+    private synchronized void DeregisterNode(OverlayNodeSendsDeregistration dereg, TCPConnection origin) {
 
         // Ensure source IP matches message IP.
         if (!Arrays.equals(dereg.IPAddress, origin.getRemoteIP().getAddress())) {
@@ -162,24 +171,24 @@ public class Registry implements Node {
         }
 
         // Ensure node is registered.
-        if(RegisteredNodes.containsKey(dereg.NodeID)){
+        if (RegisteredNodes.containsKey(dereg.NodeID)) {
             RegisteredNodes.remove(dereg.NodeID);
             String message = String.format("Deregistration request successful.  The number of messaging " +
                     "nodes currently constituting the overlay is (%s).", RegisteredNodes.size());
             SendDeregistrationStatus(origin, message, dereg.NodeID);
             System.out.println(String.format("Node deregistered. ID: %s, IPAddr: %s, Port: %s",
                     dereg.NodeID, origin.getRemoteIP().getHostAddress(), dereg.Port));
-        }else{
+        } else {
             String message = "Deregistration failed. Node was not registered.";
             SendDeregistrationStatus(origin, message, -1);
             System.out.println(String.format("ERROR. Node deregistration failed. ID %s was not in the " +
-                            "registry.", dereg.NodeID));
+                    "registry.", dereg.NodeID));
         }
 
     }
 
 
-    private void RegisterNode(OverlayNodeSendsRegistration reg, TCPConnection origin) {
+    private synchronized void RegisterNode(OverlayNodeSendsRegistration reg, TCPConnection origin) {
 
         // Ensure source IP matches message IP.
         if (!Arrays.equals(reg.IPAddress, origin.getRemoteIP().getAddress())) {
@@ -226,7 +235,7 @@ public class Registry implements Node {
         RegistryReportsDeregistrationStatus deregStatus = new RegistryReportsDeregistrationStatus();
         deregStatus.SuccessStatus = success;
         deregStatus.Message = message;
-        try{
+        try {
             dest.sendData(deregStatus.getBytes());
         } catch (IOException e) {
             e.printStackTrace();

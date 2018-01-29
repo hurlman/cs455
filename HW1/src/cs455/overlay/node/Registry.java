@@ -226,7 +226,6 @@ public class Registry implements Node {
         // Ensure node has not already registered. Otherwise register.
         RoutingEntry re = new RoutingEntry(origin, reg.IPAddress, reg.Port);
         if (RegisteredNodes.containsValue(re)) {
-            String message = "Registration failed.  Node has previsouly registered.";
             SendRegistrationStatus(origin, "Node has previously registered.", -1);
             System.out.println(String.format("ERROR. Node is attempting to reregister. IPAddr: %s, Port: %s",
                     origin.getRemoteIP().getHostAddress(), reg.Port));

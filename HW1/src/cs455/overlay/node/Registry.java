@@ -26,6 +26,7 @@ public class Registry implements Node {
     private ServerSocket serverSocket;
     private TCPConnectionCache tcpCache;
     private cs455.overlay.routing.Overlay overlay;
+    private boolean ReadyToStart = false;
 
     public static void main(String[] args) {
         new Registry().doMain(args);
@@ -133,6 +134,7 @@ public class Registry implements Node {
                 DeregisterNode((OverlayNodeSendsDeregistration) message, origin);
                 break;
             case NODE_REPORTS_OVERLAY_SETUP_STATUS:
+                TrackReadyNodes((NodeReportsOverlaySetupStatus) message, origin);
                 break;
             case OVERLAY_NODE_REPORTS_TASK_FINISHED:
                 break;
@@ -156,9 +158,34 @@ public class Registry implements Node {
             case LIST_ROUTING_TABLES:
                 ListRoutes();
                 break;
+            case START:
+                TaskInitiate(arg);
+                break;
             default:
                 System.out.println("Invalid command for Registry.");
                 break;
+        }
+    }
+
+    private void TrackReadyNodes(NodeReportsOverlaySetupStatus message, TCPConnection origin) {
+        if(message.SuccessStatus > -1){
+            System.out.println(message.Message);
+            if (overlay.connectionsComplete(message.SuccessStatus)){
+                ReadyToStart = true;
+                System.out.println("All nodes are now ready to start sending messages.");
+            }
+        }else{
+            System.out.println(message.Message);
+            //TODO Exit here??
+        }
+    }
+
+    private void TaskInitiate(int arg){
+        if(ReadyToStart){
+            System.out.println("Sending task initiate command to all nodes!");
+        }
+        else{
+            System.out.println("All nodes have not yet reported that they are ready.");
         }
     }
 

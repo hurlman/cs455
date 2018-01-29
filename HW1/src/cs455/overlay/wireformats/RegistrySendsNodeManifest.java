@@ -19,6 +19,7 @@ public class RegistrySendsNodeManifest implements Event {
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream din =
                 new DataInputStream(new BufferedInputStream(baInputStream));
+        NodeRoutingTable = new ArrayList<>();
 
         type = din.readByte();
 

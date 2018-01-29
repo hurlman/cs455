@@ -38,7 +38,10 @@ public class Overlay {
         return nodeList;
     }
 
-    public boolean connectionsComplete() {
+    /** Updates node as ready, returns true if all nodes are now ready. */
+    public synchronized boolean connectionsComplete(int ID){
+        nodes.get(ID).OverlayConnectionsMade = true;
+
         for (RoutingEntry node : nodes.values()) {
             if (!node.OverlayConnectionsMade) return false;
         }

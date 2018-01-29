@@ -103,14 +103,26 @@ public class MessagingNode implements Node {
     private void CreateRoutingTable(RegistrySendsNodeManifest message, TCPConnection origin) {
 
         routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList);
+        int success = ID;
+        String msg = "Overlay setup response from node " + ID + ". ";
+        try {
+            msg += routingTable.setupConnections();
 
-        try{
-            routingTable.setupConnections();
-        }catch (IOException e){
-            System.out.println("Error creating all routing table connections. " + e.getMessage());
+        } catch (IOException e) {
+            String err = "Error creating all routing table connections. " + e.getMessage();
+            System.out.println(err);
+            msg += err;
+            success = -1;
         }
 
-        //TODO Node reports overlay setup status
+        NodeReportsOverlaySetupStatus statusMsg = new NodeReportsOverlaySetupStatus();
+        statusMsg.Message = msg;
+        statusMsg.SuccessStatus = success;
+        try {
+            tcpCache.sendToRegistry(statusMsg.getBytes());
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message, TCPConnection origin) {
@@ -158,7 +170,7 @@ public class MessagingNode implements Node {
     }
 
     private void Deregister() {
-        try{
+        try {
             OverlayNodeSendsDeregistration myDereg = new OverlayNodeSendsDeregistration();
             myDereg.NodeID = ID;
             myDereg.Port = Port;

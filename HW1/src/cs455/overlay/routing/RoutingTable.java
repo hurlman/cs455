@@ -18,17 +18,20 @@ public class RoutingTable {
     }
 
     /** Creates TCP connections for all entries in the routing table. Run first. */
-    public void setupConnections() throws IOException{
+    public String setupConnections() throws IOException{
+        String msg = "Connection made to nodes: ";
         for(Map.Entry<Integer, RoutingEntry> rme : routingTable.entrySet()){
             RoutingEntry re = rme.getValue();
             InetAddress nodeAddr = InetAddress.getByAddress(re.IPAddress);
-            Socket clientSocket = new Socket(nodeAddr, re.ID);
+            Socket clientSocket = new Socket(nodeAddr, re.Port);
             TCPConnection reConnection = new TCPConnection(clientSocket);
             re.tcpConnection = reConnection;
 
+            msg += re.ID + ", ";
             System.out.println(String.format("Connection made to node %s.  %s:%s",
                     re.ID, nodeAddr.getHostAddress(), re.Port));
         }
+        return msg + "\b\b  ";
     }
 
     public void Relay(int destination, long data){

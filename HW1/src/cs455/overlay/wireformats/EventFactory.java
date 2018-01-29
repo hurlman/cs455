@@ -45,6 +45,10 @@ public final class EventFactory extends Observable {
                 break;
             case REGISTRY_SENDS_NODE_MANIFEST:
                 Subscriber.onEvent(new RegistrySendsNodeManifest(messageData), origin);
+                break;
+            case NODE_REPORTS_OVERLAY_SETUP_STATUS:
+                Subscriber.onEvent(new NodeReportsOverlaySetupStatus(messageData), origin);
+                break;
         }
     }
 

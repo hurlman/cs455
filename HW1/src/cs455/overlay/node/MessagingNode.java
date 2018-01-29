@@ -101,7 +101,16 @@ public class MessagingNode implements Node {
     }
 
     private void CreateRoutingTable(RegistrySendsNodeManifest message, TCPConnection origin) {
+
         routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList);
+
+        try{
+            routingTable.setupConnections();
+        }catch (IOException e){
+            System.out.println("Error creating all routing table connections. " + e.getMessage());
+        }
+
+        //TODO Node reports overlay setup status
     }
 
     private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message, TCPConnection origin) {

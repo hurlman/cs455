@@ -49,6 +49,12 @@ public final class EventFactory extends Observable {
             case NODE_REPORTS_OVERLAY_SETUP_STATUS:
                 Subscriber.onEvent(new NodeReportsOverlaySetupStatus(messageData), origin);
                 break;
+            case REGISTRY_REQUESTS_TASK_INITIATE:
+                Subscriber.onEvent(new RegistryRequestsTaskInitiate(messageData), origin);
+                break;
+            case OVERLAY_NODE_SENDS_DATA:
+                Subscriber.onEvent(new OverlayNodeSendsData(messageData), origin);
+                break;
         }
     }
 

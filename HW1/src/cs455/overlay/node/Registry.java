@@ -168,23 +168,36 @@ public class Registry implements Node {
     }
 
     private void TrackReadyNodes(NodeReportsOverlaySetupStatus message, TCPConnection origin) {
-        if(message.SuccessStatus > -1){
+        if (message.SuccessStatus > -1) {
             System.out.println(message.Message);
-            if (overlay.connectionsComplete(message.SuccessStatus)){
+            if (overlay.connectionsComplete(message.SuccessStatus)) {
                 ReadyToStart = true;
                 System.out.println("All nodes are now ready to start sending messages.");
             }
-        }else{
+        } else {
             System.out.println(message.Message);
             //TODO Exit here??
         }
     }
 
-    private void TaskInitiate(int arg){
-        if(ReadyToStart){
-            System.out.println("Sending task initiate command to all nodes!");
-        }
-        else{
+    private void TaskInitiate(int numberOfPackets) {
+        if (ReadyToStart) {
+            if (numberOfPackets > 0) {
+                System.out.println("Sending task initiate command to all nodes!");
+                RegistryRequestsTaskInitiate startMsg = new RegistryRequestsTaskInitiate();
+                startMsg.NumberOfPackets = numberOfPackets;
+
+                try {
+                    for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
+                        re.getValue().tcpConnection.sendData(startMsg.getBytes());
+                    }
+                } catch (IOException e) {
+                    System.out.println("Error sending task initiate.");
+                    e.printStackTrace();
+                }
+            } else
+                System.out.println("You must enter number of messages to send.");
+        } else {
             System.out.println("All nodes have not yet reported that they are ready.");
         }
     }

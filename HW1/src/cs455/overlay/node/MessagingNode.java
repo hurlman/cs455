@@ -13,7 +13,7 @@ import cs455.overlay.wireformats.*;
 
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
@@ -89,8 +89,10 @@ public class MessagingNode implements Node {
                 CreateRoutingTable((RegistrySendsNodeManifest) message, origin);
                 break;
             case REGISTRY_REQUESTS_TASK_INITIATE:
+                GenerateNewData((RegistryRequestsTaskInitiate) message, origin);
                 break;
             case OVERLAY_NODE_SENDS_DATA:
+                //TODO Relay
                 break;
             case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
                 break;
@@ -100,9 +102,47 @@ public class MessagingNode implements Node {
         }
     }
 
+    /**
+     * Generates and sends off packets. This will run on the main thread.
+     */
+    private void GenerateNewData(RegistryRequestsTaskInitiate message, TCPConnection origin) {
+        System.out.println(String.format("Beginning sending %s messages.", message.NumberOfPackets));
+
+        OverlayNodeSendsData newDataMsg = new OverlayNodeSendsData();
+        for (int i = 0; i < message.NumberOfPackets; i++) {
+            int sink = routingTable.getRandomDest();
+            newDataMsg.DestinationID = sink;
+            newDataMsg.SourceID = ID;
+            newDataMsg.Payload = ThreadLocalRandom.current().nextInt();
+            newDataMsg.DisseminationTrace.clear();
+
+            TCPConnection nextDest = routingTable.getDest(sink);
+
+            SendDataMessage(newDataMsg, nextDest);
+
+            if (i % 1000 == 0) System.out.println(i + " messages sent.");
+        }
+
+        //TODO Send task complete
+    }
+
+    private void SendDataMessage(OverlayNodeSendsData dataToSend, TCPConnection nextDest) {
+        try {
+            nextDest.sendData(dataToSend.getBytes());
+        } catch (IOException e) {
+            System.out.println("Error sending message. " + e.getMessage());
+            System.out.print(String.format("Src: %, Dst: %, Hops: ",
+                    dataToSend.SourceID, dataToSend.DestinationID));
+            for (int hop : dataToSend.DisseminationTrace) {
+                System.out.print(hop + ", ");
+            }
+            System.out.println("\b\b  ");
+        }
+    }
+
     private void CreateRoutingTable(RegistrySendsNodeManifest message, TCPConnection origin) {
 
-        routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList);
+        routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList, ID);
         int success = ID;
         String msg = "Overlay setup response from node " + ID + ". ";
         try {
@@ -120,7 +160,7 @@ public class MessagingNode implements Node {
         statusMsg.SuccessStatus = success;
         try {
             tcpCache.sendToRegistry(statusMsg.getBytes());
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -134,6 +174,7 @@ public class MessagingNode implements Node {
         if (message.SuccessStatus > -1) {
             ID = message.SuccessStatus;
             System.out.println(message.Message);
+            System.out.println("My ID is " + ID);
         } else {
             System.out.println(message.Message);
             //TODO Exit here??

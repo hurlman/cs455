@@ -21,9 +21,6 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class MessagingNode implements Node {
 
-    private int RegistryPort;
-    private InetAddress RegistryIP;
-    private ServerSocket serverSocket;
     private int Port;
     private TCPConnectionCache tcpCache;
     private int ID;
@@ -40,14 +37,14 @@ public class MessagingNode implements Node {
         }
         try {
             // Store command line input.
-            RegistryPort = Integer.parseInt(args[1]);
-            RegistryIP = InetAddress.getByName(args[0]);
+            int registryPort = Integer.parseInt(args[1]);
+            InetAddress registryIP = InetAddress.getByName(args[0]);
 
             // Subscribe to event factory.
             EventFactory.getInstance().subscribe(this);
 
             // Set up connection handler.
-            serverSocket = new ServerSocket(0);
+            ServerSocket serverSocket = new ServerSocket(0);
             Port = serverSocket.getLocalPort();
             tcpCache = new TCPConnectionCache(serverSocket);
             System.out.println(String.format("Server socket open: %s:%s", InetAddress.getLocalHost(), Port));
@@ -56,7 +53,7 @@ public class MessagingNode implements Node {
             OverlayNodeSendsRegistration myReg = new OverlayNodeSendsRegistration();
             myReg.IPAddress = InetAddress.getLocalHost().getAddress();
             myReg.Port = Port;
-            Socket clientSocket = new Socket(RegistryIP, RegistryPort);
+            Socket clientSocket = new Socket(registryIP, registryPort);
             tcpCache.setRegistryConnection(clientSocket);
             tcpCache.sendToRegistry(myReg.getBytes());
 
@@ -80,19 +77,19 @@ public class MessagingNode implements Node {
     public void onEvent(Event message, TCPConnection origin) {
         switch (message.getType()) {
             case REGISTRY_REPORTS_REGISTRATION_STATUS:
-                HandleRegistrationStatus((RegistryReportsRegistrationStatus) message, origin);
+                HandleRegistrationStatus((RegistryReportsRegistrationStatus) message);
                 break;
             case REGISTRY_REPORTS_DEREGISTRATION_STATUS:
-                HandleDeregistrationStatus((RegistryReportsDeregistrationStatus) message, origin);
+                HandleDeregistrationStatus((RegistryReportsDeregistrationStatus) message);
                 break;
             case REGISTRY_SENDS_NODE_MANIFEST:
-                CreateRoutingTable((RegistrySendsNodeManifest) message, origin);
+                CreateRoutingTable((RegistrySendsNodeManifest) message);
                 break;
             case REGISTRY_REQUESTS_TASK_INITIATE:
-                GenerateNewData((RegistryRequestsTaskInitiate) message, origin);
+                GenerateNewData((RegistryRequestsTaskInitiate) message);
                 break;
             case OVERLAY_NODE_SENDS_DATA:
-                //TODO Relay
+                ReceivedData((OverlayNodeSendsData) message);
                 break;
             case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
                 break;
@@ -103,9 +100,17 @@ public class MessagingNode implements Node {
     }
 
     /**
+     * Received data from another node.  Add to totals or relay
+     */
+    private void ReceivedData(OverlayNodeSendsData message) {
+        System.out.println(String.format("Got something. Src: %s, Dst: %s, Payload: %s, Hops: %s",
+                message.SourceID, message.DestinationID, message.Payload, message.DisseminationTrace.size()));
+    }
+
+    /**
      * Generates and sends off packets. This will run on the main thread.
      */
-    private void GenerateNewData(RegistryRequestsTaskInitiate message, TCPConnection origin) {
+    private void GenerateNewData(RegistryRequestsTaskInitiate message) {
         System.out.println(String.format("Beginning sending %s messages.", message.NumberOfPackets));
 
         OverlayNodeSendsData newDataMsg = new OverlayNodeSendsData();
@@ -120,7 +125,7 @@ public class MessagingNode implements Node {
 
             SendDataMessage(newDataMsg, nextDest);
 
-            if (i % 1000 == 0) System.out.println(i + " messages sent.");
+            if (i % 1000 == 0) System.out.println((i + 1) + " messages sent.");
         }
 
         //TODO Send task complete
@@ -131,7 +136,7 @@ public class MessagingNode implements Node {
             nextDest.sendData(dataToSend.getBytes());
         } catch (IOException e) {
             System.out.println("Error sending message. " + e.getMessage());
-            System.out.print(String.format("Src: %, Dst: %, Hops: ",
+            System.out.print(String.format("Src: %s, Dst: %s, Hops: ",
                     dataToSend.SourceID, dataToSend.DestinationID));
             for (int hop : dataToSend.DisseminationTrace) {
                 System.out.print(hop + ", ");
@@ -140,7 +145,7 @@ public class MessagingNode implements Node {
         }
     }
 
-    private void CreateRoutingTable(RegistrySendsNodeManifest message, TCPConnection origin) {
+    private void CreateRoutingTable(RegistrySendsNodeManifest message) {
 
         routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList, ID);
         int success = ID;
@@ -165,12 +170,12 @@ public class MessagingNode implements Node {
         }
     }
 
-    private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message, TCPConnection origin) {
+    private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message) {
         System.out.println(message.Message);
         //TODO Exit here??
     }
 
-    private void HandleRegistrationStatus(RegistryReportsRegistrationStatus message, TCPConnection origin) {
+    private void HandleRegistrationStatus(RegistryReportsRegistrationStatus message) {
         if (message.SuccessStatus > -1) {
             ID = message.SuccessStatus;
             System.out.println(message.Message);
@@ -218,8 +223,6 @@ public class MessagingNode implements Node {
             myDereg.IPAddress = InetAddress.getLocalHost().getAddress();
 
             tcpCache.sendToRegistry(myDereg.getBytes());
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -46,15 +46,17 @@ public class RoutingTable {
         for (int i = 0; i < clockwiseRoute.length; i++) {
             dest = clockwiseRoute[i];
             if (dest == sink) break;
-            if (clockwiseRoute[i] < clockwiseRoute[i - 1]) {  // We looped around.
-                if (sink > clockwiseRoute[i - 1] || sink < clockwiseRoute[i]) {
+            if(i > 0) {
+                if (clockwiseRoute[i] < clockwiseRoute[i - 1]) {  // We looped around.
+                    if (sink > clockwiseRoute[i - 1] || sink < clockwiseRoute[i]) {
+                        dest = clockwiseRoute[i - 1];
+                        break;
+                    }
+                }
+                if ((i > 1) && (clockwiseRoute[i] > sink)) {
                     dest = clockwiseRoute[i - 1];
                     break;
                 }
-            }
-            if (clockwiseRoute[i] > sink) {
-                dest = clockwiseRoute[i - 1];
-                break;
             }
         }
         return routingTable.get(dest).tcpConnection;
@@ -64,7 +66,7 @@ public class RoutingTable {
         int randomNum;
         do {
             randomNum = ThreadLocalRandom.current().nextInt(0, orderedNodes.length);
-        } while (orderedNodes[randomNum] != ID);
+        } while (orderedNodes[randomNum] == ID);
         return orderedNodes[randomNum];
     }
 

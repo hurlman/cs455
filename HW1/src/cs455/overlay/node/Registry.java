@@ -23,7 +23,6 @@ public class Registry implements Node {
     private int Port;
     private int ID = 0;
     private Map<Integer, RoutingEntry> RegisteredNodes = new HashMap<>();
-    private ServerSocket serverSocket;
     private TCPConnectionCache tcpCache;
     private cs455.overlay.routing.Overlay overlay;
     private boolean ReadyToStart = false;
@@ -42,7 +41,7 @@ public class Registry implements Node {
             EventFactory.getInstance().subscribe(this);
 
             // Set up connection handler.
-            serverSocket = new ServerSocket(Port);
+            ServerSocket serverSocket = new ServerSocket(Port);
             tcpCache = new TCPConnectionCache(serverSocket);
             System.out.println(String.format("Server socket open: %s:%s", InetAddress.getLocalHost(), Port));
             System.out.println("Awaiting messaging node registration.");
@@ -183,7 +182,7 @@ public class Registry implements Node {
     private void TaskInitiate(int numberOfPackets) {
         if (ReadyToStart) {
             if (numberOfPackets > 0) {
-                System.out.println("Sending task initiate command to all nodes!");
+                System.out.println("Sending TASK_INITIATE to all nodes!");
                 RegistryRequestsTaskInitiate startMsg = new RegistryRequestsTaskInitiate();
                 startMsg.NumberOfPackets = numberOfPackets;
 

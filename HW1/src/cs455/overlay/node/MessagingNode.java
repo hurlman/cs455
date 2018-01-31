@@ -9,6 +9,7 @@ import cs455.overlay.routing.RoutingTable;
 import cs455.overlay.transport.TCPConnection;
 import cs455.overlay.transport.TCPConnectionCache;
 import cs455.overlay.util.InteractiveCommandParser;
+import cs455.overlay.util.StatisticsCollectorAndDisplay;
 import cs455.overlay.wireformats.*;
 
 import java.net.*;
@@ -22,9 +23,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MessagingNode implements Node {
 
     private int Port;
+    private byte[] IPAddr;
     private TCPConnectionCache tcpCache;
     private int ID;
     private RoutingTable routingTable;
+    private StatisticsCollectorAndDisplay stats = new StatisticsCollectorAndDisplay();
 
     public static void main(String[] args) {
         new MessagingNode().doMain(args);
@@ -43,6 +46,7 @@ public class MessagingNode implements Node {
             // Subscribe to event factory.
             EventFactory.getInstance().subscribe(this);
 
+
             // Set up connection handler.
             ServerSocket serverSocket = new ServerSocket(0);
             Port = serverSocket.getLocalPort();
@@ -51,7 +55,8 @@ public class MessagingNode implements Node {
 
             // Register immediately.
             OverlayNodeSendsRegistration myReg = new OverlayNodeSendsRegistration();
-            myReg.IPAddress = InetAddress.getLocalHost().getAddress();
+            IPAddr = InetAddress.getLocalHost().getAddress();
+            myReg.IPAddress = IPAddr;
             myReg.Port = Port;
             Socket clientSocket = new Socket(registryIP, registryPort);
             tcpCache.setRegistryConnection(clientSocket);
@@ -92,6 +97,7 @@ public class MessagingNode implements Node {
                 ReceivedData((OverlayNodeSendsData) message);
                 break;
             case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
+                ReportTrafficSummary();
                 break;
             default:
                 // Do nothing.
@@ -103,37 +109,62 @@ public class MessagingNode implements Node {
      * Received data from another node.  Add to totals or relay
      */
     private void ReceivedData(OverlayNodeSendsData message) {
-        System.out.println(String.format("Got something. Src: %s, Dst: %s, Payload: %s, Hops: %s",
-                message.SourceID, message.DestinationID, message.Payload, message.DisseminationTrace.size()));
+//  System.out.println(String.format("Got something. Src: %s, Dst: %s, Payload: %s, Hops: %s",
+//      message.SourceID, message.DestinationID, message.Payload, message.DisseminationTrace.size()));
+
+        if (message.DestinationID == ID) {
+            // We are the sink.
+            stats.dataReceived(message.Payload);
+        } else {
+            // Relay
+            message.DisseminationTrace.add(ID);
+            stats.dataRelayed();
+            SendDataMessage(message);
+        }
     }
 
     /**
      * Generates and sends off packets. This will run on the main thread.
+     * Sends task complete after loop has finished.
      */
     private void GenerateNewData(RegistryRequestsTaskInitiate message) {
         System.out.println(String.format("Beginning sending %s messages.", message.NumberOfPackets));
 
         OverlayNodeSendsData newDataMsg = new OverlayNodeSendsData();
         for (int i = 0; i < message.NumberOfPackets; i++) {
-            int sink = routingTable.getRandomDest();
-            newDataMsg.DestinationID = sink;
+
+            int payload = ThreadLocalRandom.current().nextInt();
+            newDataMsg.DestinationID = routingTable.getRandomDest();
             newDataMsg.SourceID = ID;
-            newDataMsg.Payload = ThreadLocalRandom.current().nextInt();
+            newDataMsg.Payload = payload;
             newDataMsg.DisseminationTrace.clear();
 
-            TCPConnection nextDest = routingTable.getDest(sink);
+            SendDataMessage(newDataMsg);
+            stats.dataSent(payload);
 
-            SendDataMessage(newDataMsg, nextDest);
-
-            if (i % 1000 == 0) System.out.println((i + 1) + " messages sent.");
+            if ((i + 1) % 1000 == 0) {
+                System.out.println((i + 1) + " messages sent.");
+            }
         }
 
-        //TODO Send task complete
+        OverlayNodeReportsTaskFinished completeMessage = new OverlayNodeReportsTaskFinished();
+        completeMessage.NodeID = ID;
+        completeMessage.Port = Port;
+        completeMessage.IPAddress = IPAddr;
+        try {
+            tcpCache.sendToRegistry(completeMessage.getBytes());
+        } catch (IOException e) {
+            System.out.println("Error informing registry task complete.");
+            e.printStackTrace();
+        }
     }
 
-    private void SendDataMessage(OverlayNodeSendsData dataToSend, TCPConnection nextDest) {
+    /**
+     * Forwards a message towards its destination according to routing table.
+     */
+    private void SendDataMessage(OverlayNodeSendsData dataToSend) {
         try {
-            nextDest.sendData(dataToSend.getBytes());
+            routingTable.getDest(dataToSend.DestinationID).sendData(dataToSend.getBytes());
         } catch (IOException e) {
             System.out.println("Error sending message. " + e.getMessage());
             System.out.print(String.format("Src: %s, Dst: %s, Hops: ",
@@ -145,6 +176,11 @@ public class MessagingNode implements Node {
         }
     }
 
+    /**
+     * Receives manifest from registry, initializes routing table, and establishes
+     * connections to nodes.  Finally, notifies registry of completion of this task,
+     * successful or otherwise.
+     */
     private void CreateRoutingTable(RegistrySendsNodeManifest message) {
 
         routingTable = new RoutingTable(message.NodeRoutingTable, message.orderedNodeList, ID);
@@ -170,11 +206,17 @@ public class MessagingNode implements Node {
         }
     }
 
+    /**
+     * Just prints registry response of a deregistration request.
+     */
     private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message) {
         System.out.println(message.Message);
         //TODO Exit here??
     }
 
+    /**
+     * On registration response, sets ID if one is returned. Prints registry message.
+     */
     private void HandleRegistrationStatus(RegistryReportsRegistrationStatus message) {
         if (message.SuccessStatus > -1) {
             ID = message.SuccessStatus;
@@ -186,6 +228,9 @@ public class MessagingNode implements Node {
         }
     }
 
+    /**
+     * Handler for incoming keyboard commands.
+     */
     @Override
     public void onCommand(InteractiveCommandParser.Command command, int arg) {
         switch (command) {
@@ -201,20 +246,37 @@ public class MessagingNode implements Node {
         }
     }
 
-    private void PrintDiags() {
-        // Doing reregister for testing.
+    /**
+     * Prints counters, sends to registry, resets counters.
+     */
+    private void ReportTrafficSummary() {
+
         try {
-            OverlayNodeSendsRegistration myReg = new OverlayNodeSendsRegistration();
-            myReg.IPAddress = InetAddress.getLocalHost().getAddress();
-            myReg.Port = Port;
+            OverlayNodeReportsTrafficSummary summaryMsg = new OverlayNodeReportsTrafficSummary();
+            summaryMsg.Sent = stats.getSendTracker();
+            summaryMsg.Relayed = stats.getRelayTracker();
+            summaryMsg.SentSum = stats.getSendSummation();
+            summaryMsg.Received = stats.getReceiveTracker();
+            summaryMsg.ReceivedSum = stats.getReceiveSummation();
 
-            tcpCache.sendToRegistry(myReg.getBytes());
-
+            tcpCache.sendToRegistry(summaryMsg.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        stats.resetCounters();
     }
 
+    /**
+     * Prints counters to screen.
+     */
+    private void PrintDiags() {
+        stats.NodeDisplay();
+    }
+
+    /**
+     * Sends deregistration request to registry.
+     */
     private void Deregister() {
         try {
             OverlayNodeSendsDeregistration myDereg = new OverlayNodeSendsDeregistration();

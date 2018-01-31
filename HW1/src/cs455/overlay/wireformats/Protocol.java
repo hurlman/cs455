@@ -33,6 +33,8 @@ public class Protocol {
 
     public static int BUFFER_SIZE = 1024;
 
+    public final static int RELAY_WAIT = 5;
+
     public enum MessageType {
 
         OVERLAY_NODE_SENDS_REGISTRATION(2),

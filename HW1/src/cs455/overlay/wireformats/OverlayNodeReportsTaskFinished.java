@@ -1,45 +1,37 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cs455.overlay.wireformats;
-
-import cs455.overlay.wireformats.Protocol.*;
 
 import java.io.*;
 
-/**
- * @author Mike
- */
-public class OverlayNodeSendsRegistration implements Event {
+public class OverlayNodeReportsTaskFinished implements Event {
 
     public byte[] IPAddress;
     public int Port;
+    public int NodeID;
 
     private int type;
 
-    public OverlayNodeSendsRegistration() {
-        type = MessageType.OVERLAY_NODE_SENDS_REGISTRATION.GetIntValue();
+    public OverlayNodeReportsTaskFinished() {
+        type = Protocol.MessageType.OVERLAY_NODE_REPORTS_TASK_FINISHED.GetIntValue();
     }
 
-    public OverlayNodeSendsRegistration(byte[] marshalledBytes) throws IOException {
+    public OverlayNodeReportsTaskFinished(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream din =
                 new DataInputStream(new BufferedInputStream(baInputStream));
 
-        type = din.readByte(); // redundant?
+        type = din.readByte();
 
         int ipAddrLen = din.readByte();
         IPAddress = new byte[ipAddrLen];
         din.readFully(IPAddress);
 
         Port = din.readInt();
+        NodeID = din.readInt();
     }
 
     @Override
-    public MessageType getType() {
-        return MessageType.getMessageType(type);
+    public Protocol.MessageType getType() {
+        return Protocol.MessageType.getMessageType(type);
     }
 
     @Override
@@ -53,6 +45,7 @@ public class OverlayNodeSendsRegistration implements Event {
         dout.writeByte(IPAddress.length);
         dout.write(IPAddress);
         dout.writeInt(Port);
+        dout.writeInt(NodeID);
 
         dout.flush();
         marshalledBytes = baOutputStream.toByteArray();
@@ -61,5 +54,4 @@ public class OverlayNodeSendsRegistration implements Event {
         dout.close();
         return marshalledBytes;
     }
-
 }

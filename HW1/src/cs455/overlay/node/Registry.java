@@ -8,11 +8,14 @@ package cs455.overlay.node;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import cs455.overlay.transport.*;
-import cs455.overlay.util.InteractiveCommandParser;
+import cs455.overlay.util.*;
 import cs455.overlay.wireformats.*;
 import cs455.overlay.routing.*;
+
+import static cs455.overlay.wireformats.Protocol.RELAY_WAIT;
 
 
 /**
@@ -21,11 +24,11 @@ import cs455.overlay.routing.*;
 public class Registry implements Node {
 
     private int Port;
-    private int ID = 0;
+    private Set<Integer> NodeIDs = new HashSet<>();
     private Map<Integer, RoutingEntry> RegisteredNodes = new HashMap<>();
-    private TCPConnectionCache tcpCache;
     private cs455.overlay.routing.Overlay overlay;
     private boolean ReadyToStart = false;
+    private StatisticsCollectorAndDisplay stats = new StatisticsCollectorAndDisplay();
 
     public static void main(String[] args) {
         new Registry().doMain(args);
@@ -41,8 +44,7 @@ public class Registry implements Node {
             EventFactory.getInstance().subscribe(this);
 
             // Set up connection handler.
-            ServerSocket serverSocket = new ServerSocket(Port);
-            tcpCache = new TCPConnectionCache(serverSocket);
+            new TCPConnectionCache(new ServerSocket(Port));
             System.out.println(String.format("Server socket open: %s:%s", InetAddress.getLocalHost(), Port));
             System.out.println("Awaiting messaging node registration.");
 
@@ -59,16 +61,25 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Generates unique ID between 0 and 127.  Returns false NodeIDs >= 128.
+     */
     private synchronized int GetID() {
-        if (ID > 127) {
-            System.out.println("Too many nodes have registered. Max is 128. Exiting.");
-            System.exit(0);
+        if (NodeIDs.size() >= 128) {
+            System.out.println("Too many nodes have registered. Max is 128.");
+            return -1;
         }
-        return ID++;
+
+        int newID;
+        do {
+            newID = ThreadLocalRandom.current().nextInt(0, 128);
+        } while (!NodeIDs.add(newID));
+
+        return newID;
     }
 
     private void ListNodes() {
-        System.out.println("Currently registered nodes:");
+        System.out.println("Currently registered nodes: " + RegisteredNodes.size());
         for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
             System.out.println(String.format("ID: %s, IPAddr: %s, Port %s",
                     re.getKey(),
@@ -92,11 +103,19 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Creates overlay with specified routing table size. Ensures appropriate routing
+     * table size for total number of nodes and that overlay has not already been set up.
+     * Sends node manifest to each node.
+     */
     private void SetupOverlay(int routingTableSize) {
         if (routingTableSize < 0) {
             System.out.println("Routing table size must be specified.");
-        } else if (routingTableSize < 2 || routingTableSize > 4) {
-            System.out.println(routingTableSize + " is an invalid routing table size.");
+        } else if (!(RegisteredNodes.size() > (2 * routingTableSize))) {
+            System.out.println(String.format("%s is an invalid routing table size for %s nodes.",
+                    routingTableSize, RegisteredNodes.size()));
+        } else if (ReadyToStart) {
+            System.out.println("Overlay already set up and nodes connected.");
         } else {
             System.out.println("Registration ended. Setting up overlay. RT size: " + routingTableSize);
             overlay = new Overlay(RegisteredNodes, routingTableSize);
@@ -110,6 +129,9 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Sends manifest to a node containing that node's routing table and full node ID list.
+     */
     private void SendNodeManifest(RoutingEntry re, List<RoutingEntry> routingTable, int[] orderedNodeList) {
         RegistrySendsNodeManifest manifestMessage = new RegistrySendsNodeManifest();
         manifestMessage.NodeRoutingTable = routingTable;
@@ -123,6 +145,9 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Handles incoming messages. Initiates appropriate action based on message type.
+     */
     @Override
     public void onEvent(Event message, TCPConnection origin) {
         switch (message.getType()) {
@@ -133,11 +158,13 @@ public class Registry implements Node {
                 DeregisterNode((OverlayNodeSendsDeregistration) message, origin);
                 break;
             case NODE_REPORTS_OVERLAY_SETUP_STATUS:
-                TrackReadyNodes((NodeReportsOverlaySetupStatus) message, origin);
+                TrackReadyNodes((NodeReportsOverlaySetupStatus) message);
                 break;
             case OVERLAY_NODE_REPORTS_TASK_FINISHED:
+                TrackFinishedNodes((OverlayNodeReportsTaskFinished) message, origin);
                 break;
             case OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY:
+                TrackReceivedSummaries((OverlayNodeReportsTrafficSummary) message);
                 break;
             default:
                 // Do nothing.
@@ -145,6 +172,9 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Handles keyboard input.  Initiates appropriate action.
+     */
     @Override
     public void onCommand(InteractiveCommandParser.Command command, int arg) {
         switch (command) {
@@ -166,7 +196,7 @@ public class Registry implements Node {
         }
     }
 
-    private void TrackReadyNodes(NodeReportsOverlaySetupStatus message, TCPConnection origin) {
+    private void TrackReadyNodes(NodeReportsOverlaySetupStatus message) {
         if (message.SuccessStatus > -1) {
             System.out.println(message.Message);
             if (overlay.connectionsComplete(message.SuccessStatus)) {
@@ -176,6 +206,40 @@ public class Registry implements Node {
         } else {
             System.out.println(message.Message);
             //TODO Exit here??
+        }
+    }
+
+    private void TrackFinishedNodes(OverlayNodeReportsTaskFinished message, TCPConnection origin) {
+        if (!Arrays.equals(message.IPAddress, origin.getRemoteIP().getAddress())) {
+            System.out.println(String.format("ERROR. Task complete message from invalid source IP. Node: %s",
+                    message.NodeID));
+        } else {
+            System.out.println(String.format("Node %s has reported task complete.", message.NodeID));
+            if (overlay.taskFinished(message.NodeID)) {
+                System.out.println("All nodes have reported task complete.");
+                RequestTrafficSummary();
+            }
+        }
+    }
+
+    private void TrackReceivedSummaries(OverlayNodeReportsTrafficSummary message) {
+
+    }
+
+    private void RequestTrafficSummary() {
+        //TODO maybe change this?
+        try {
+            System.out.println(String.format("Waiting %s second(s) for relays to finish.", RELAY_WAIT));
+            Thread.sleep(RELAY_WAIT * 1000); // Wait for relays to complete
+
+            for(Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()){
+                re.getValue().tcpConnection.sendData(new RegistryRequestsTrafficSummary().getBytes());
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Error requesting traffic summary.");
+            e.printStackTrace();
         }
     }
 
@@ -201,57 +265,75 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Deregisters a node.  Ensures IP is valid and node was registered.
+     */
     private synchronized void DeregisterNode(OverlayNodeSendsDeregistration dereg, TCPConnection origin) {
+
+        String message;
+        int id = -1;
 
         // Ensure source IP matches message IP.
         if (!Arrays.equals(dereg.IPAddress, origin.getRemoteIP().getAddress())) {
-            SendDeregistrationStatus(origin, "IP does not match source.", -1);
+            message = "IP does not match source.";
             System.out.println("ERROR. Registration attempt failed. Message IP does not match source.");
-        }
-
-        // Ensure node is registered.
-        if (RegisteredNodes.containsKey(dereg.NodeID)) {
-            RegisteredNodes.remove(dereg.NodeID);
-            String message = String.format("Deregistration request successful.  The number of messaging " +
-                    "nodes currently constituting the overlay is (%s).", RegisteredNodes.size());
-            SendDeregistrationStatus(origin, message, dereg.NodeID);
-            System.out.println(String.format("Node deregistered. ID: %s, IPAddr: %s, Port: %s",
-                    dereg.NodeID, origin.getRemoteIP().getHostAddress(), dereg.Port));
         } else {
-            String message = "Deregistration failed. Node was not registered.";
-            SendDeregistrationStatus(origin, message, -1);
-            System.out.println(String.format("ERROR. Node deregistration failed. ID %s was not in the " +
-                    "registry.", dereg.NodeID));
+
+            // Ensure node is registered.
+            if (RegisteredNodes.containsKey(dereg.NodeID)) {
+                RegisteredNodes.remove(dereg.NodeID);
+                NodeIDs.remove(dereg.NodeID); // Free up ID.
+                message = String.format("Deregistration request successful.  The number of messaging " +
+                        "nodes currently constituting the overlay is (%s).", RegisteredNodes.size());
+                id = dereg.NodeID;
+                System.out.println(String.format("Node deregistered. ID: %s, IPAddr: %s, Port: %s",
+                        dereg.NodeID, origin.getRemoteIP().getHostAddress(), dereg.Port));
+            } else {
+                message = "Deregistration failed. Node was not registered.";
+                System.out.println(String.format("ERROR. Node deregistration failed. ID %s was not in the " +
+                        "registry.", dereg.NodeID));
+            }
         }
+        SendDeregistrationStatus(origin, message, id);
 
     }
 
-
+    /**
+     * Registers a node.  Checks to ensure node IP is valid and node has not already registered
+     * from this IP and Port.  Checks to ensure no more than 128 nodes have registered.
+     */
     private synchronized void RegisterNode(OverlayNodeSendsRegistration reg, TCPConnection origin) {
+
+        String message;
+        int id = -1;
 
         // Ensure source IP matches message IP.
         if (!Arrays.equals(reg.IPAddress, origin.getRemoteIP().getAddress())) {
-            SendRegistrationStatus(origin, "IP does not match source.", -1);
+            message = "IP does not match source.";
             System.out.println("ERROR. Registration attempt failed. Message IP does not match source.");
-        }
-
-        // Ensure node has not already registered. Otherwise register.
-        RoutingEntry re = new RoutingEntry(origin, reg.IPAddress, reg.Port);
-        if (RegisteredNodes.containsValue(re)) {
-            SendRegistrationStatus(origin, "Node has previously registered.", -1);
-            System.out.println(String.format("ERROR. Node is attempting to reregister. IPAddr: %s, Port: %s",
-                    origin.getRemoteIP().getHostAddress(), reg.Port));
         } else {
-            int id = GetID();
-            re.ID = id;
-            RegisteredNodes.put(id, re);
-            String message = String.format("Registration request successful. The number of " +
-                    "messaging nodes currently constituting the overlay is (%s).", RegisteredNodes.size());
-            SendRegistrationStatus(origin, message, id);
-            System.out.println(String.format("Node registered. ID: %s, IPAddr: %s, Port: %s",
-                    id, origin.getRemoteIP().getHostAddress(), reg.Port));
-        }
 
+            // Ensure node has not already registered. Otherwise register.
+            RoutingEntry re = new RoutingEntry(origin, reg.IPAddress, reg.Port);
+            if (RegisteredNodes.containsValue(re)) {
+                message = "Node has previously registered.";
+                System.out.println(String.format("ERROR. Node is attempting to reregister. IPAddr: %s, Port: %s",
+                        origin.getRemoteIP().getHostAddress(), reg.Port));
+            } else {
+                id = GetID();
+                if (id < 0) {
+                    message = "Unable to get ID.  Perhaps too many nodes have registered.";
+                } else {
+                    re.ID = id;
+                    RegisteredNodes.put(id, re);
+                    message = String.format("Registration request successful. The number of " +
+                            "messaging nodes currently constituting the overlay is (%s).", RegisteredNodes.size());
+                    System.out.println(String.format("Node registered. ID: %s, IPAddr: %s, Port: %s",
+                            id, origin.getRemoteIP().getHostAddress(), reg.Port));
+                }
+            }
+        }
+        SendRegistrationStatus(origin, message, id);
     }
 
     private void SendRegistrationStatus(TCPConnection dest, String message, int success) {

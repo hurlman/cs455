@@ -34,16 +34,36 @@ public class Overlay {
         return routes.get(ID);
     }
 
-    public int[] getOrderedNodeList(){
+    public int[] getOrderedNodeList() {
         return nodeList;
     }
 
-    /** Updates node as ready, returns true if all nodes are now ready. */
-    public synchronized boolean connectionsComplete(int ID){
+    /**
+     * Updates node as ready, returns true if all nodes are now ready.
+     */
+    public synchronized boolean connectionsComplete(int ID) {
         nodes.get(ID).OverlayConnectionsMade = true;
 
         for (RoutingEntry node : nodes.values()) {
             if (!node.OverlayConnectionsMade) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Updates node as task complete.  Returns true if all nodes complete.
+     */
+    public synchronized boolean taskFinished(int ID) {
+        nodes.get(ID).TaskFinished = true;
+
+        for (RoutingEntry node : nodes.values()) {
+            if (!node.TaskFinished) return false;
+        }
+
+        // If we got this far, all nodes are finished.
+        // Reset flags for next run before returning true.
+        for (RoutingEntry node : nodes.values()) {
+            node.TaskFinished = false;
         }
         return true;
     }

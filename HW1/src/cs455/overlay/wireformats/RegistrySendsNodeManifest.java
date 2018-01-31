@@ -25,7 +25,7 @@ public class RegistrySendsNodeManifest implements Event {
 
         int tableSize = din.readByte();
         for (int i = 0; i < tableSize; i++) {
-            int nodeID = din.readByte();
+            int nodeID = din.readInt();
             int ipAddrLen = din.readByte();
             byte[] ipAddr = new byte[ipAddrLen];
             din.readFully(ipAddr);
@@ -56,7 +56,7 @@ public class RegistrySendsNodeManifest implements Event {
         dout.writeByte(type);
         dout.writeByte(NodeRoutingTable.size());
         for (RoutingEntry re : NodeRoutingTable) {
-            dout.writeByte(re.ID);
+            dout.writeInt(re.ID);
             dout.writeByte(re.IPAddress.length);
             dout.write(re.IPAddress);
             dout.writeInt(re.Port);

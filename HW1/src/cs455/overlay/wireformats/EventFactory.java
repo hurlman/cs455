@@ -55,6 +55,12 @@ public final class EventFactory extends Observable {
             case OVERLAY_NODE_SENDS_DATA:
                 Subscriber.onEvent(new OverlayNodeSendsData(messageData), origin);
                 break;
+            case OVERLAY_NODE_REPORTS_TASK_FINISHED:
+                Subscriber.onEvent(new OverlayNodeReportsTaskFinished(messageData), origin);
+                break;
+            case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
+                Subscriber.onEvent(new RegistryRequestsTrafficSummary(messageData), origin);
+                break;
         }
     }
 

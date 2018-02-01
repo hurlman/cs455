@@ -61,6 +61,9 @@ public final class EventFactory extends Observable {
             case REGISTRY_REQUESTS_TRAFFIC_SUMMARY:
                 Subscriber.onEvent(new RegistryRequestsTrafficSummary(messageData), origin);
                 break;
+            case OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY:
+                Subscriber.onEvent(new OverlayNodeReportsTrafficSummary(messageData), origin);
+                break;
         }
     }
 

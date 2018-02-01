@@ -45,7 +45,8 @@ public class Registry implements Node {
 
             // Set up connection handler.
             new TCPConnectionCache(new ServerSocket(Port));
-            System.out.println(String.format("Server socket open: %s:%s", InetAddress.getLocalHost(), Port));
+            System.out.println(String.format("Server socket open: %s:%s",
+                    InetAddress.getLocalHost(), Port));
             System.out.println("Awaiting messaging node registration.");
 
             // Begin accepting keyboard input.
@@ -62,7 +63,7 @@ public class Registry implements Node {
     }
 
     /**
-     * Generates unique ID between 0 and 127.  Returns false NodeIDs >= 128.
+     * Generates unique ID between 0 and 127.  Returns false if NodeIDs >= 128.
      */
     private synchronized int GetID() {
         if (NodeIDs.size() >= 128) {
@@ -141,7 +142,8 @@ public class Registry implements Node {
             System.out.println(String.format("Sending manifest to node %s.", re.ID));
             re.tcpConnection.sendData(manifestMessage.getBytes());
         } catch (IOException e) {
-            System.out.println(String.format("Error sending manifest to node %s. %s", re.ID, e.getMessage()));
+            System.out.println(String.format("Error sending manifest to node %s. %s",
+                    re.ID, e.getMessage()));
         }
     }
 
@@ -165,9 +167,6 @@ public class Registry implements Node {
                 break;
             case OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY:
                 TrackReceivedSummaries((OverlayNodeReportsTrafficSummary) message);
-                break;
-            default:
-                // Do nothing.
                 break;
         }
     }
@@ -196,6 +195,10 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * Sets ReadyToStart flag which signals the overlay has been set up and is
+     * ready to start sending messages.
+     */
     private void TrackReadyNodes(NodeReportsOverlaySetupStatus message) {
         if (message.SuccessStatus > -1) {
             System.out.println(message.Message);
@@ -209,10 +212,15 @@ public class Registry implements Node {
         }
     }
 
+    /**
+     * This method is run when an overlay node reports it has finished sending
+     * messages. Checks if all nodes have finished sending messages.  If so,
+     * sends request for traffic summary from all nodes.
+     */
     private void TrackFinishedNodes(OverlayNodeReportsTaskFinished message, TCPConnection origin) {
         if (!Arrays.equals(message.IPAddress, origin.getRemoteIP().getAddress())) {
-            System.out.println(String.format("ERROR. Task complete message from invalid source IP. Node: %s",
-                    message.NodeID));
+            System.out.println(String.format("ERROR. Task complete message from invalid source IP. " +
+                            "Node: %s", message.NodeID));
         } else {
             System.out.println(String.format("Node %s has reported task complete.", message.NodeID));
             if (overlay.taskFinished(message.NodeID)) {
@@ -222,8 +230,16 @@ public class Registry implements Node {
         }
     }
 
-    private void TrackReceivedSummaries(OverlayNodeReportsTrafficSummary message) {
-
+    /**
+     * Run when a node reports its summary.  Adds totals to statistics collector.
+     * Prints report once all nodes have reported their totals.
+     */
+    private void TrackReceivedSummaries(OverlayNodeReportsTrafficSummary nodeSummary) {
+        stats.addNodeTotal(nodeSummary);
+        if (overlay.summaryReceived(nodeSummary.NodeID)) {
+            System.out.println("All nodes have reported totals.  Final report:");
+            stats.printFinalReport();
+        }
     }
 
     private void RequestTrafficSummary() {
@@ -232,7 +248,7 @@ public class Registry implements Node {
             System.out.println(String.format("Waiting %s second(s) for relays to finish.", RELAY_WAIT));
             Thread.sleep(RELAY_WAIT * 1000); // Wait for relays to complete
 
-            for(Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()){
+            for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
                 re.getValue().tcpConnection.sendData(new RegistryRequestsTrafficSummary().getBytes());
             }
         } catch (InterruptedException e) {
@@ -290,8 +306,8 @@ public class Registry implements Node {
                         dereg.NodeID, origin.getRemoteIP().getHostAddress(), dereg.Port));
             } else {
                 message = "Deregistration failed. Node was not registered.";
-                System.out.println(String.format("ERROR. Node deregistration failed. ID %s was not in the " +
-                        "registry.", dereg.NodeID));
+                System.out.println(String.format("ERROR. Node deregistration failed. ID %s was not " +
+                        "in the registry.", dereg.NodeID));
             }
         }
         SendDeregistrationStatus(origin, message, id);
@@ -317,7 +333,8 @@ public class Registry implements Node {
             RoutingEntry re = new RoutingEntry(origin, reg.IPAddress, reg.Port);
             if (RegisteredNodes.containsValue(re)) {
                 message = "Node has previously registered.";
-                System.out.println(String.format("ERROR. Node is attempting to reregister. IPAddr: %s, Port: %s",
+                System.out.println(String.format("ERROR. Node is attempting to reregister. " +
+                                "IPAddr: %s, Port: %s",
                         origin.getRemoteIP().getHostAddress(), reg.Port));
             } else {
                 id = GetID();
@@ -327,7 +344,8 @@ public class Registry implements Node {
                     re.ID = id;
                     RegisteredNodes.put(id, re);
                     message = String.format("Registration request successful. The number of " +
-                            "messaging nodes currently constituting the overlay is (%s).", RegisteredNodes.size());
+                                    "messaging nodes currently constituting the overlay is (%s).",
+                            RegisteredNodes.size());
                     System.out.println(String.format("Node registered. ID: %s, IPAddr: %s, Port: %s",
                             id, origin.getRemoteIP().getHostAddress(), reg.Port));
                 }

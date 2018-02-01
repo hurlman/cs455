@@ -67,4 +67,19 @@ public class Overlay {
         }
         return true;
     }
+
+    public synchronized boolean summaryReceived(int ID){
+        nodes.get(ID).ReportReceived = true;
+
+        for(RoutingEntry node : nodes.values()){
+            if(!node.ReportReceived) return false;
+        }
+
+        // If we got this far, all nodes are finished.
+        // Reset flags for next run before returning true.
+        for(RoutingEntry node : nodes.values()){
+            node.ReportReceived = false;
+        }
+        return true;
+    }
 }

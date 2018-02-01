@@ -80,7 +80,7 @@ public class StatisticsCollectorAndDisplay {
         System.out.println("RecSum: " + receiveSumDisplay);
     }
 
-    public void addNodeTotal(OverlayNodeReportsTrafficSummary nodeTotal){
+    public synchronized void addNodeTotal(OverlayNodeReportsTrafficSummary nodeTotal){
         nodeTotals.add(nodeTotal);
     }
 
@@ -91,7 +91,8 @@ public class StatisticsCollectorAndDisplay {
         sendSumDisplay = 0;
         receiveSumDisplay = 0;
 
-        System.out.println("        Sent    Received    Relayed     Sum Sent        Sum Rec");
+        //TODO Proper spacing so this doesn't look like trash.
+        System.out.println("          Sent       Received     Relayed      Sum Sent           Sum Rec");
         nodeTotals.sort(Comparator.comparingInt(o -> o.NodeID));
         for(OverlayNodeReportsTrafficSummary o : nodeTotals){
             System.out.println(String.format("Node %s   %s      %s      %s      %s          %s",
@@ -102,7 +103,7 @@ public class StatisticsCollectorAndDisplay {
             sendSumDisplay += o.SentSum;
             receiveSumDisplay += o.ReceivedSum;
         }
-        System.out.println(String.format("Sum   %s      %s      %s      %s          %s",
+        System.out.println(String.format("Sum       %s     %s    %s      %s          %s",
                 sentDisplay, receiveDisplay, relayDisplay, sendSumDisplay, receiveSumDisplay));
 
         nodeTotals.clear();

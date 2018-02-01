@@ -8,7 +8,6 @@ package cs455.overlay.wireformats;
 import cs455.overlay.*;
 
 /**
- *
  * @author Mike
  */
 public class Protocol {
@@ -37,6 +36,7 @@ public class Protocol {
 
     public enum MessageType {
 
+        UNKNOWN(0),
         OVERLAY_NODE_SENDS_REGISTRATION(2),
         REGISTRY_REPORTS_REGISTRATION_STATUS(3),
         OVERLAY_NODE_SENDS_DEREGISTRATION(4),
@@ -65,7 +65,7 @@ public class Protocol {
                     return a;
                 }
             }
-            return null;
+            return UNKNOWN;
         }
 
     }

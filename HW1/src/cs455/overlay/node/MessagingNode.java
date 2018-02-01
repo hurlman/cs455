@@ -51,7 +51,8 @@ public class MessagingNode implements Node {
             ServerSocket serverSocket = new ServerSocket(0);
             Port = serverSocket.getLocalPort();
             tcpCache = new TCPConnectionCache(serverSocket);
-            System.out.println(String.format("Server socket open: %s:%s", InetAddress.getLocalHost(), Port));
+            System.out.println(String.format("Server socket open: %s:%s",
+                    InetAddress.getLocalHost(), Port));
 
             // Register immediately.
             OverlayNodeSendsRegistration myReg = new OverlayNodeSendsRegistration();
@@ -253,6 +254,7 @@ public class MessagingNode implements Node {
 
         try {
             OverlayNodeReportsTrafficSummary summaryMsg = new OverlayNodeReportsTrafficSummary();
+            summaryMsg.NodeID = ID;
             summaryMsg.Sent = stats.getSendTracker();
             summaryMsg.Relayed = stats.getRelayTracker();
             summaryMsg.SentSum = stats.getSendSummation();

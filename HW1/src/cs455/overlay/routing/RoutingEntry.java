@@ -12,8 +12,11 @@ public class RoutingEntry {
     public byte[] IPAddress;
     public int Port;
     public int ID;
+
+    // Flags to track each node completing various tasks.
     public boolean OverlayConnectionsMade = false;
     public boolean TaskFinished = false;
+    public boolean ReportReceived = false;
 
     public RoutingEntry(TCPConnection tcpConnection, byte[] IPAddress, int port) {
         this.tcpConnection = tcpConnection;

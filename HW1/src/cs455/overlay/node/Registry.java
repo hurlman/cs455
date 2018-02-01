@@ -110,6 +110,8 @@ public class Registry implements Node {
      * Sends node manifest to each node.
      */
     private void SetupOverlay(int routingTableSize) {
+
+        // Perform initial error checking on routing table size.
         if (routingTableSize < 0) {
             System.out.println("Routing table size must be specified.");
         } else if (!(RegisteredNodes.size() > (2 * routingTableSize))) {
@@ -119,8 +121,14 @@ public class Registry implements Node {
             System.out.println("Overlay already set up and nodes connected.");
         } else {
             System.out.println("Registration ended. Setting up overlay. RT size: " + routingTableSize);
+
+            // Initializing overlay with all nodes that have registered and RT size.  This also will
+            // create the routing table for each node.
             overlay = new Overlay(RegisteredNodes, routingTableSize);
 
+            // Send manifest message to each node.  Overlay class has public functions to return the list of
+            // registry entries that are part of each node's routing table, as well as the full ordered list of
+            // node IDs.
             System.out.println("Overlay setup complete.  Sending node manifests.");
             for (Map.Entry<Integer, RoutingEntry> re : RegisteredNodes.entrySet()) {
                 SendNodeManifest(re.getValue(),

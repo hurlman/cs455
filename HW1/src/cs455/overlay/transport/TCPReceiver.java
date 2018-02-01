@@ -6,6 +6,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+/**
+ * Calls EventFactor when data arrives on socket.  Passes data as well as a reference to the TCPConnection.
+ */
 public class TCPReceiver extends Thread {
 
     private Socket socket;

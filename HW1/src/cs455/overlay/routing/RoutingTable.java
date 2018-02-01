@@ -7,12 +7,20 @@ import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
 
+/**
+ * Used by overlay node to store information on nodes in its routing table.  Contains public functions to
+ * set up TCP connections, get appropriate destinations for data according the sink ID, and get random destinations
+ * for new messages.
+ */
 public class RoutingTable {
     private Map<Integer, RoutingEntry> routingTable = new ConcurrentHashMap<>();
     private int[] orderedNodes;
     private int ID;
     private int[] clockwiseRoute;
 
+    /**
+     * Initialized with a list of routing entries and list of nodes, along with the owning node ID.
+     */
     public RoutingTable(List<RoutingEntry> routingEntries, int[] orderedNodes, int id) {
         this.orderedNodes = orderedNodes;
         ID = id;
@@ -54,7 +62,7 @@ public class RoutingTable {
                         dest = clockwiseRoute[i - 1];             // And sink is between this hop and last.
                         break;
                     }
-                }else if (clockwiseRoute[i] > sink && sink > clockwiseRoute[i-1]) { // Didn't loop around.
+                } else if (clockwiseRoute[i] > sink && sink > clockwiseRoute[i - 1]) { // Didn't loop around.
                     dest = clockwiseRoute[i - 1];
                     break;
                 }

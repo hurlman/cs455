@@ -4,6 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 
+/**
+ * Sends data to socket output stream using a Blocking Queue.
+ */
 public class TCPSender extends Thread {
 
     private DataOutputStream dout;

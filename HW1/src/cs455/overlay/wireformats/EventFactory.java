@@ -2,12 +2,18 @@ package cs455.overlay.wireformats;
 
 import java.net.InetAddress;
 import java.util.Observable;
+
 import cs455.overlay.node.Node;
 import cs455.overlay.transport.TCPConnection;
 import cs455.overlay.wireformats.Protocol.*;
+
 import java.io.*;
 
-public final class EventFactory extends Observable {
+/**
+ * Raises events to Registry and Messaging Node when data arrives on a TCP connection via the newMessage method.
+ * Singleton pattern to handle access from multiple classes and threads.  Raises events to subscriber.
+ */
+public final class EventFactory {
 
     private static final EventFactory INSTANCE = new EventFactory();
 
@@ -20,17 +26,21 @@ public final class EventFactory extends Observable {
     public static EventFactory getInstance() {
         return INSTANCE;
     }
+
     private Node Subscriber;
 
     public void subscribe(Node subscriber) {
         Subscriber = subscriber;
     }
-    
-    public void newMessage(byte[] messageData, TCPConnection origin) throws IOException{
+
+    /**
+     * Called by TCPReceiver threads to raise events to Registry and Messaging Nodes that data has arrived.
+     */
+    public void newMessage(byte[] messageData, TCPConnection origin) throws IOException {
 
         int type = messageData[0];
-        
-        switch(MessageType.getMessageType(type)){
+
+        switch (MessageType.getMessageType(type)) {
             case OVERLAY_NODE_SENDS_REGISTRATION:
                 Subscriber.onEvent(new OverlayNodeSendsRegistration(messageData), origin);
                 break;

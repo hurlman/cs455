@@ -7,6 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Abstraction representing a messaging node. Used by both Registry and messaging nodes
+ * to hold information about other nodes.
+ */
 public class RoutingEntry {
     public TCPConnection tcpConnection;
     public byte[] IPAddress;
@@ -23,6 +27,7 @@ public class RoutingEntry {
         this.IPAddress = IPAddress;
         Port = port;
     }
+
     public RoutingEntry(byte[] IPAddress, int port, int id) {
         this.IPAddress = IPAddress;
         Port = port;

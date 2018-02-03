@@ -3,7 +3,6 @@ package cs455.overlay.util;
 import cs455.overlay.wireformats.OverlayNodeReportsTrafficSummary;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class StatisticsCollectorAndDisplay {
     }
 
     /**
-     * Incremenst sent tracker and adds to send sum.
+     * Increments sent tracker and adds to send sum.
      */
     public synchronized void dataSent(int payload) {
         sendTracker++;
@@ -92,12 +91,19 @@ public class StatisticsCollectorAndDisplay {
      */
     public void NodeDisplay() {
         System.out.println();
-        System.out.println("Totals for this round.");
+        System.out.println("Totals for the last report.");
         System.out.println("Sent: " + sentDisplay);
         System.out.println("Received: " + receiveDisplay);
         System.out.println("Relayed: " + relayDisplay);
         System.out.println("SentSum: " + sendSumDisplay);
         System.out.println("RecSum: " + receiveSumDisplay);
+        System.out.println();
+        System.out.println("Current tracker and sum values.");
+        System.out.println("Sent: " + sendTracker);
+        System.out.println("Received: " + receiveTracker);
+        System.out.println("Relayed: " + relayTracker);
+        System.out.println("SentSum: " + sendSummation);
+        System.out.println("RecSum: " + receiveSummation);
     }
 
     /**
@@ -117,20 +123,20 @@ public class StatisticsCollectorAndDisplay {
         sendSumDisplay = 0;
         receiveSumDisplay = 0;
 
-        //TODO Proper spacing so this doesn't look like trash.
-        System.out.println("          Sent       Received     Relayed      Sum Sent           Sum Rec");
+        String format = "%-10s %-10s %-10s %-10s %-18s %s%n";
+        System.out.printf(format, "", "Sent", "Received", "Relayed", "Sent Sum", "Received Sum");
         nodeTotals.sort(Comparator.comparingInt(o -> o.NodeID));
         for (OverlayNodeReportsTrafficSummary o : nodeTotals) {
-            System.out.println(String.format("Node %s   %s      %s      %s      %s          %s",
-                    o.NodeID, o.Sent, o.Received, o.Relayed, o.SentSum, o.ReceivedSum));
+            System.out.printf(format,
+                    "Node" + o.NodeID, o.Sent, o.Received, o.Relayed, o.SentSum, o.ReceivedSum);
             sentDisplay += o.Sent;
             receiveDisplay += o.Received;
             relayDisplay += o.Relayed;
             sendSumDisplay += o.SentSum;
             receiveSumDisplay += o.ReceivedSum;
         }
-        System.out.println(String.format("Sum       %s     %s    %s      %s          %s",
-                sentDisplay, receiveDisplay, relayDisplay, sendSumDisplay, receiveSumDisplay));
+        System.out.printf(format,
+                "Sum", sentDisplay, receiveDisplay, relayDisplay, sendSumDisplay, receiveSumDisplay);
 
         nodeTotals.clear();
     }

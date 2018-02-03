@@ -12,27 +12,7 @@ import cs455.overlay.*;
  */
 public class Protocol {
 
-    public static int ByteToInt(byte[] bytes) {
-        int i = 0;
-        i |= bytes[0] & 0xFF;
-        i <<= 8;
-        i |= bytes[1] & 0xFF;
-        i <<= 8;
-        i |= bytes[2] & 0xFF;
-        return i;
-    }
-
-    public static byte[] IntToByte(int i) {
-        byte[] bytes = new byte[3];
-        bytes[0] = (byte) ((i >> 16) & 0xFF);
-        bytes[1] = (byte) ((i >> 8) & 0xFF);
-        bytes[2] = (byte) (i & 0xFF);
-        return bytes;
-    }
-
-    public static int BUFFER_SIZE = 1024;
-
-    public final static int RELAY_WAIT = 5;
+    public final static int RELAY_WAIT = 3;
 
     public enum MessageType {
 

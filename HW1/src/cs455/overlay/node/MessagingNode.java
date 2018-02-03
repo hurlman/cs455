@@ -208,15 +208,15 @@ public class MessagingNode implements Node {
     }
 
     /**
-     * Just prints registry response of a deregistration request.
+     * Prints registry response of a deregistration request.
      */
     private void HandleDeregistrationStatus(RegistryReportsDeregistrationStatus message) {
         System.out.println(message.Message);
-        //TODO Exit here??
     }
 
     /**
      * On registration response, sets ID if one is returned. Prints registry message.
+     * Exit on failure.
      */
     private void HandleRegistrationStatus(RegistryReportsRegistrationStatus message) {
         if (message.SuccessStatus > -1) {
@@ -225,7 +225,7 @@ public class MessagingNode implements Node {
             System.out.println("My ID is " + ID);
         } else {
             System.out.println(message.Message);
-            //TODO Exit here??
+            System.exit(0);
         }
     }
 

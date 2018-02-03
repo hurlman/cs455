@@ -216,7 +216,9 @@ public class Registry implements Node {
             }
         } else {
             System.out.println(message.Message);
-            //TODO Exit here??
+            // Node has failed after registration.  This is a situation we are not required to handle.
+            System.out.println("A node has failed setting up overlay.  Overlay is now invalid. Exiting");
+            System.exit(0);
         }
     }
 

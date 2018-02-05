@@ -22,6 +22,7 @@ public class ThreadPoolManager {
 
         for (int i = 0; i < threadCount; i++) {
             threads[i] = new WorkerThread();
+            threads[i].setName("Worker thread " + i);
             threads[i].start();
         }
 
@@ -44,8 +45,8 @@ public class ThreadPoolManager {
                     synchronized (mutex) {
                         while (tasks.isEmpty()) {
                             mutex.wait();
-                            task = tasks.poll();
                         }
+                        task = tasks.poll();
                     }
                     if (task != null) {
                         task.runClientTask();

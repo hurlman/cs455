@@ -1,5 +1,5 @@
 package cs455.scaling.tasks;
 
 public interface ClientTask {
-    void runClientTask();
+    void runClientTask() throws InterruptedException;
 }

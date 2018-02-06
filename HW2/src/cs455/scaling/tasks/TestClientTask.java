@@ -2,8 +2,8 @@ package cs455.scaling.tasks;
 
 
 
-import static cs455.scaling.server.Server.count;
-import static cs455.scaling.server.Server.randInt;
+import static cs455.scaling.server.Server.countThreadUsage;
+import static cs455.scaling.util.Util.randInt;
 
 public class TestClientTask implements ClientTask {
 
@@ -11,8 +11,8 @@ public class TestClientTask implements ClientTask {
     @Override
     public void runClientTask() throws InterruptedException {
         String threadName = Thread.currentThread().getName();
-        count(threadName);
+        countThreadUsage(threadName);
 
-        Thread.sleep(randInt(1,100));
+        Thread.sleep(randInt(1,10));
     }
 }

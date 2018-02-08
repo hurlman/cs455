@@ -143,7 +143,7 @@ public class MessagingNode implements Node {
             SendDataMessage(newDataMsg);
             stats.dataSent(payload);
 
-            if ((i + 1) % 1000 == 0) {
+            if ((i + 1) % 5000 == 0) {
                 System.out.println((i + 1) + " messages sent.");
             }
         }

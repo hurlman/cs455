@@ -1,13 +1,14 @@
-Hard-Coded 3 second wait after registry receives Task_Complete from all nodes.
-This was tested to be sufficient for 100,000 messages on 25 nodes with a routing table size of 3.
-Larger routing tables, less nodes, and less messages require less time, so I considered my test
-to be a max boundary condition, and 3 seconds to be sufficient.
-
 There is no exit command for the Registry or MessagingNodes, so a CTRL+C is used.
 
 Once the overlay is set up, it cannot be changed unless the program is exited and restarted.
 
 No recovery from TCP disconnects, I did not run into any during testing unless doing CTRL+C.
+
+The Messaging Node may deregister with the "exit-overlay" command, but this does not exit the program.
+This is to show that a subsequent deregistration by that node will be detected as a fault by the
+Registry.  There is no way to re-register, though, without closing (CTRL+C) and restarting the Messaging
+Node.  Nodes can be de-registered and re-registered multiple times prior to the "setup-overlay" command
+being run.
 
 
 

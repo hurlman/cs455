@@ -12,7 +12,7 @@ import cs455.overlay.*;
  */
 public class Protocol {
 
-    public final static int RELAY_WAIT = 3;
+    public final static int RELAY_WAIT = 5;
 
     public enum MessageType {
 

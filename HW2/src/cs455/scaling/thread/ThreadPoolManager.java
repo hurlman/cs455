@@ -5,11 +5,6 @@ import cs455.scaling.tasks.ClientTask;
 import java.util.*;
 
 public class ThreadPoolManager {
-    // list of work to be done - fifo linked list
-
-    //method to retrieve a spare worker
-
-    //worker return thread to pool
 
     private final LinkedList<ClientTask> tasks = new LinkedList<>();
     private volatile boolean run;
@@ -39,7 +34,7 @@ public class ThreadPoolManager {
 
 
         public void run() {
-            ClientTask task = null;
+            ClientTask task;
             while (run) {
                 try {
                     synchronized (mutex) {

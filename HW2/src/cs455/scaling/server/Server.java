@@ -12,20 +12,18 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import static cs455.scaling.util.Util.BUFFER_SIZE;
 
 public class Server implements Runnable {
 
-    Selector selector;
+    private Selector selector;
     private ThreadPoolManager pool;
     private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 
     private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
-
+    private final LinkedList<SocketChannel> socketsToWrite = new LinkedList<>();
 
     public static void main(String args[]) {
         try {
@@ -37,7 +35,7 @@ public class Server implements Runnable {
 
     }
 
-    public Server(int port, ThreadPoolManager pool) throws IOException {
+    private Server(int port, ThreadPoolManager pool) throws IOException {
         this.pool = pool;
         selector = Selector.open();
         ServerSocketChannel serverSocket = ServerSocketChannel.open();
@@ -49,8 +47,17 @@ public class Server implements Runnable {
     public void run() {
 
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             try {
+                synchronized (socketsToWrite){
+                    for(SocketChannel s : socketsToWrite){
+                        SelectionKey key = s.keyFor(selector);
+                        key.interestOps(SelectionKey.OP_WRITE);
+                    }
+                    socketsToWrite.clear();
+                }
+
                 selector.select();  //blocking
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
                 while (it.hasNext()) {
@@ -87,7 +94,7 @@ public class Server implements Runnable {
         csc.configureBlocking(false);
         csc.register(key.selector(), SelectionKey.OP_READ);
 
-        clients.put(csc, new ClientConnection(csc));
+        clients.put(csc, new ClientConnection(csc, this));
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -114,11 +121,20 @@ public class Server implements Runnable {
     }
 
     private void write(SelectionKey key) throws IOException {
+        SocketChannel sc = (SocketChannel) key.channel();
 
+        LinkedList<ByteBuffer> queue = clients.get(sc).getResponses();
+        while(!queue.isEmpty()){
+            sc.write(queue.poll());
+        }
+        key.interestOps(SelectionKey.OP_READ);
     }
 
-    public void queueSend(SocketChannel socket, String hash) {
-
+    public void queueSend(SocketChannel socket) {
+        synchronized (socketsToWrite) {
+            socketsToWrite.add(socket);
+        }
+        selector.wakeup();
     }
 
     private void removeClients() {

@@ -1,37 +1,56 @@
 package cs455.scaling.server;
 
 //import cs455.scaling.tasks.TestClientTask;
+
+import cs455.scaling.tasks.ClientConnection;
 import cs455.scaling.thread.ThreadPoolManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static cs455.scaling.util.Util.BUFFER_SIZE;
 
-public class Server {
+public class Server implements Runnable {
 
-    Selector something;
-    private static HashMap<String, Integer> tracker = new HashMap<>();
+    Selector selector;
+    private ThreadPoolManager pool;
+    private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+
+    private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
+
 
     public static void main(String args[]) {
         try {
             ThreadPoolManager pool = new ThreadPoolManager(Integer.parseInt(args[1]));
-            ClientCache clients = new ClientCache();
+            new Thread(new Server(Integer.parseInt(args[0]), pool)).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            Selector selector = Selector.open();
-            ServerSocketChannel serverSocket = ServerSocketChannel.open();
-            serverSocket.bind(new InetSocketAddress(Integer.parseInt(args[0])));
-            serverSocket.configureBlocking(false);
-            serverSocket.register(selector, SelectionKey.OP_ACCEPT);
+    }
 
-            byte[] buffer = new byte[BUFFER_SIZE];
+    public Server(int port, ThreadPoolManager pool) throws IOException {
+        this.pool = pool;
+        selector = Selector.open();
+        ServerSocketChannel serverSocket = ServerSocketChannel.open();
+        serverSocket.bind(new InetSocketAddress(port));
+        serverSocket.configureBlocking(false);
+        serverSocket.register(selector, SelectionKey.OP_ACCEPT);
+    }
 
-            while (true) {
+    public void run() {
+
+
+        while (true) {
+            try {
                 selector.select();  //blocking
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
                 while (it.hasNext()) {
@@ -43,29 +62,68 @@ public class Server {
                             continue;
                         }
                         if (key.isAcceptable()) {
-                            clients.addClient(key);
+                            accept(key);
                         } else if (key.isReadable()) {
-                            clients.readFromClient(key);
+                            read(key);
                         } else if (key.isWritable()) {
-                            clients.writeToClient(key);
+                            write(key);
                         }
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    clients.removeClients();
+                    removeClients();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-
-        } catch (NumberFormatException nfe) {
-            System.out.println("Invalid argument. " + nfe.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
+    private void accept(SelectionKey key) throws IOException {
+        ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+        SocketChannel csc = ssc.accept();
+        csc.configureBlocking(false);
+        csc.register(key.selector(), SelectionKey.OP_READ);
+
+        clients.put(csc, new ClientConnection(csc));
+    }
+
+    private void read(SelectionKey key) throws IOException {
+        SocketChannel sc = (SocketChannel) key.channel();
+        readBuffer.clear();
+        int numRead;
+        try {
+            numRead = sc.read(readBuffer);
+        } catch (IOException e) {
+            sc.close();
+            clients.remove(sc);
+            key.cancel();
+            return;
+        }
+        if (numRead == -1) {
+            sc.close();
+            clients.remove(sc);
+            key.cancel();
+            return;
+        }
+
+        clients.get(sc).setNewTask(readBuffer.array(), numRead);
+        pool.execute(clients.get(sc));
+    }
+
+    private void write(SelectionKey key) throws IOException {
+
+    }
+
+    public void queueSend(SocketChannel socket, String hash) {
+
+    }
+
+    private void removeClients() {
+        clients.keySet().removeIf(socket -> !socket.isOpen());
+    }
 }
 
 

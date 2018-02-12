@@ -1,6 +1,7 @@
-package cs455.scaling.tasks;
+package cs455.scaling.server;
 
-import cs455.scaling.server.Server;
+import cs455.scaling.tasks.Sha1Calculator;
+import cs455.scaling.thread.ThreadPoolManager;
 import cs455.scaling.util.Util;
 
 import java.nio.ByteBuffer;
@@ -8,40 +9,40 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-public class ClientConnection implements ClientTask {
+public class ClientConnection {
 
     private Server server;
-    private byte[] dataIn;
+    private ThreadPoolManager pool;
     private final LinkedList<ByteBuffer> responses = new LinkedList<>();
     private SocketChannel socket;
     private int processed = 0;
 
-    public ClientConnection(SocketChannel socket, Server server) {
+    ClientConnection(SocketChannel socket, Server server, ThreadPoolManager pool) {
         this.socket = socket;
         this.server = server;
+        this.pool = pool;
     }
 
     public void setNewTask(byte[] newData, int numRead){
-        dataIn = new byte[numRead];
-        dataIn = Arrays.copyOfRange(newData, 0, numRead);
+        byte[] dataIn = Arrays.copyOfRange(newData, 0, numRead);
+        Sha1Calculator task  = new Sha1Calculator(this, dataIn);
+        pool.execute(task);
     }
 
-    @Override
-    public void runClientTask() throws InterruptedException {
-        String response = Util.SHA1FromBytes(dataIn);
+    public void handleResponse(ByteBuffer response){
         synchronized (responses){
-            responses.add(ByteBuffer.wrap(response.getBytes()));
+            responses.add(response);
         }
         incrementProcessed();
         server.queueSend(socket);
     }
 
     public LinkedList<ByteBuffer> getResponses(){
-        LinkedList<ByteBuffer> out;
+        LinkedList<ByteBuffer> out = new LinkedList<>();
         synchronized (responses){
-            // deep copy?
-            out = (LinkedList<ByteBuffer>) responses.clone();
-            responses.clear();
+            while(!responses.isEmpty()){
+                out.add(responses.poll());
+            }
         }
         return out;
     }

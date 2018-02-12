@@ -2,7 +2,6 @@ package cs455.scaling.server;
 
 //import cs455.scaling.tasks.TestClientTask;
 
-import cs455.scaling.tasks.ClientConnection;
 import cs455.scaling.thread.ThreadPoolManager;
 
 import java.io.IOException;
@@ -94,7 +93,7 @@ public class Server implements Runnable {
         csc.configureBlocking(false);
         csc.register(key.selector(), SelectionKey.OP_READ);
 
-        clients.put(csc, new ClientConnection(csc, this));
+        clients.put(csc, new ClientConnection(csc, this, pool));
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -117,7 +116,6 @@ public class Server implements Runnable {
         }
 
         clients.get(sc).setNewTask(readBuffer.array(), numRead);
-        pool.execute(clients.get(sc));
     }
 
     private void write(SelectionKey key) throws IOException {

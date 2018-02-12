@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="29807c58-701c-451b-9d82-19037bbdde24" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/cs455/scaling/client/MultiClient.java" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/src/cs455/scaling/client/Client.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/client/Client.java" />
+      <change beforePath="$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java" />
       <change beforePath="$PROJECT_DIR$/src/cs455/scaling/server/Server.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/server/Server.java" />
-      <change beforePath="$PROJECT_DIR$/src/cs455/scaling/tasks/ClientConnection.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java" />
-      <change beforePath="$PROJECT_DIR$/src/cs455/scaling/tasks/ClientTask.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/tasks/ClientTask.java" />
+      <change beforePath="$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java" />
+      <change beforePath="$PROJECT_DIR$/src/cs455/scaling/util/Util.java" afterPath="$PROJECT_DIR$/src/cs455/scaling/util/Util.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,39 +22,29 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="Server.java" pinned="false" current-in-tab="false">
+          <file leaf-file-name="Server.java" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/cs455/scaling/server/Server.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1256">
-                  <caret line="138" column="14" lean-forward="false" selection-start-line="138" selection-start-column="14" selection-end-line="138" selection-end-column="14" />
+                <state relative-caret-position="538">
+                  <caret line="64" column="0" lean-forward="true" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
                   <folding>
                     <element signature="imports" expanded="true" />
-                    <element signature="e#4344#4345#0" expanded="true" />
-                    <element signature="e#4413#4414#0" expanded="true" />
+                    <element signature="e#4536#4537#0" expanded="true" />
+                    <element signature="e#4605#4606#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="Thread.java" pinned="false" current-in-tab="false">
-            <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/lang/Thread.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="237">
-                  <caret line="747" column="0" lean-forward="false" selection-start-line="747" selection-start-column="0" selection-end-line="747" selection-end-column="0" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="ClientConnection.java" pinned="false" current-in-tab="true">
+          <file leaf-file-name="ClientConnection.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="777">
-                  <caret line="46" column="19" lean-forward="true" selection-start-line="46" selection-start-column="19" selection-end-line="46" selection-end-column="19" />
+                <state relative-caret-position="193">
+                  <caret line="14" column="35" lean-forward="false" selection-start-line="14" selection-start-column="35" selection-end-line="14" selection-end-column="35" />
                   <folding>
                     <element signature="imports" expanded="true" />
-                    <element signature="e#1442#1443#0" expanded="true" />
-                    <element signature="e#1469#1470#0" expanded="true" />
+                    <element signature="e#1449#1450#0" expanded="true" />
+                    <element signature="e#1476#1477#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -61,11 +53,9 @@
           <file leaf-file-name="Sha1Calculator.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="504">
-                  <caret line="24" column="0" lean-forward="true" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
-                  <folding>
-                    <element signature="imports" expanded="true" />
-                  </folding>
+                <state relative-caret-position="84">
+                  <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+                  <folding />
                 </state>
               </provider>
             </entry>
@@ -73,8 +63,8 @@
           <file leaf-file-name="Util.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/cs455/scaling/util/Util.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="609">
-                  <caret line="29" column="5" lean-forward="true" selection-start-line="29" selection-start-column="5" selection-end-line="29" selection-end-column="5" />
+                <state relative-caret-position="441">
+                  <caret line="21" column="17" lean-forward="false" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
                   <folding>
                     <element signature="imports" expanded="true" />
                   </folding>
@@ -97,8 +87,8 @@
           <file leaf-file-name="ClientTask.java" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/cs455/scaling/tasks/ClientTask.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="63">
-                  <caret line="3" column="24" lean-forward="false" selection-start-line="3" selection-start-column="24" selection-end-line="3" selection-end-column="24" />
+                <state relative-caret-position="84">
+                  <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
                   <folding />
                 </state>
               </provider>
@@ -123,9 +113,25 @@
           <file leaf-file-name="Client.java" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/cs455/scaling/client/Client.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="42">
-                  <caret line="2" column="21" lean-forward="true" selection-start-line="2" selection-start-column="21" selection-end-line="2" selection-end-column="21" />
-                  <folding />
+                <state relative-caret-position="736">
+                  <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+                  <folding>
+                    <element signature="imports" expanded="true" />
+                    <element signature="e#4614#5133#0" expanded="true" />
+                    <element signature="e#5132#5133#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="MultiClient.java" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/cs455/scaling/client/MultiClient.java">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="273">
+                  <caret line="13" column="16" lean-forward="false" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
+                  <folding>
+                    <element signature="imports" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -156,14 +162,16 @@
         <option value="$PROJECT_DIR$/src/cs455/scaling/thread/ServerThread.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/thread/ThreadPoolManager.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/tasks/TestClientTask.java" />
-        <option value="$PROJECT_DIR$/src/cs455/scaling/util/Util.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/tasks/ClientData.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/server/ClientCache.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/tasks/ClientConnection.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/tasks/ClientTask.java" />
-        <option value="$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java" />
+        <option value="$PROJECT_DIR$/src/cs455/scaling/client/MultiClient.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java" />
+        <option value="$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java" />
+        <option value="$PROJECT_DIR$/src/cs455/scaling/util/Util.java" />
         <option value="$PROJECT_DIR$/src/cs455/scaling/server/Server.java" />
+        <option value="$PROJECT_DIR$/src/cs455/scaling/client/Client.java" />
       </list>
     </option>
   </component>
@@ -327,12 +335,12 @@
       <workItem from="1517802949848" duration="15513000" />
       <workItem from="1517849143817" duration="2587000" />
       <workItem from="1517868923989" duration="6175000" />
-      <workItem from="1518063932968" duration="31567000" />
+      <workItem from="1518063932968" duration="39767000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55842000" />
+    <option name="totallyTimeSpent" value="64042000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="2578" height="1408" extended-state="6" />
@@ -387,8 +395,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#4344#4345#0" expanded="true" />
-            <element signature="e#4413#4414#0" expanded="true" />
+            <element signature="e#4536#4537#0" expanded="true" />
+            <element signature="e#4605#4606#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -445,8 +453,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#4344#4345#0" expanded="true" />
-            <element signature="e#4413#4414#0" expanded="true" />
+            <element signature="e#4536#4537#0" expanded="true" />
+            <element signature="e#4605#4606#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -493,8 +501,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#4344#4345#0" expanded="true" />
-            <element signature="e#4413#4414#0" expanded="true" />
+            <element signature="e#4536#4537#0" expanded="true" />
+            <element signature="e#4605#4606#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -548,28 +556,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/util/Util.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="29" column="5" lean-forward="true" selection-start-line="29" selection-start-column="5" selection-end-line="29" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/cs455/scaling/server/ClientCache.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="483">
           <caret line="23" column="0" lean-forward="true" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/lang/Thread.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="747" column="0" lean-forward="false" selection-start-line="747" selection-start-column="0" selection-end-line="747" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -584,52 +574,82 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/client/Client.java">
+    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="42">
-          <caret line="2" column="21" lean-forward="true" selection-start-line="2" selection-start-column="21" selection-end-line="2" selection-end-column="21" />
+        <state relative-caret-position="193">
+          <caret line="14" column="35" lean-forward="false" selection-start-line="14" selection-start-column="35" selection-end-line="14" selection-end-column="35" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1449#1450#0" expanded="true" />
+            <element signature="e#1476#1477#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/lang/Thread.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="237">
+          <caret line="747" column="0" lean-forward="false" selection-start-line="747" selection-start-column="0" selection-end-line="747" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/cs455/scaling/tasks/ClientTask.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="63">
-          <caret line="3" column="24" lean-forward="false" selection-start-line="3" selection-start-column="24" selection-end-line="3" selection-end-column="24" />
+        <state relative-caret-position="84">
+          <caret line="4" column="1" lean-forward="false" selection-start-line="4" selection-start-column="1" selection-end-line="4" selection-end-column="1" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/tasks/Sha1Calculator.java">
+    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/client/MultiClient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="24" column="0" lean-forward="true" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+        <state relative-caret-position="273">
+          <caret line="13" column="16" lean-forward="false" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/util/Util.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="441">
+          <caret line="21" column="17" lean-forward="false" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/client/Client.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="736">
+          <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#4614#5133#0" expanded="true" />
+            <element signature="e#5132#5133#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/cs455/scaling/server/Server.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1256">
-          <caret line="138" column="14" lean-forward="false" selection-start-line="138" selection-start-column="14" selection-end-line="138" selection-end-column="14" />
+        <state relative-caret-position="538">
+          <caret line="64" column="0" lean-forward="true" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#4344#4345#0" expanded="true" />
-            <element signature="e#4413#4414#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cs455/scaling/server/ClientConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="777">
-          <caret line="46" column="19" lean-forward="true" selection-start-line="46" selection-start-column="19" selection-end-line="46" selection-end-column="19" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1442#1443#0" expanded="true" />
-            <element signature="e#1469#1470#0" expanded="true" />
+            <element signature="e#4536#4537#0" expanded="true" />
+            <element signature="e#4605#4606#0" expanded="true" />
           </folding>
         </state>
       </provider>

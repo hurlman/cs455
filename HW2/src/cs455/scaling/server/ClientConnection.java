@@ -23,35 +23,35 @@ public class ClientConnection {
         this.pool = pool;
     }
 
-    public void setNewTask(byte[] newData, int numRead){
+    public void setNewTask(byte[] newData, int numRead) {
         byte[] dataIn = Arrays.copyOfRange(newData, 0, numRead);
-        Sha1Calculator task  = new Sha1Calculator(this, dataIn);
+        Sha1Calculator task = new Sha1Calculator(this, dataIn);
         pool.execute(task);
     }
 
-    public void handleResponse(ByteBuffer response){
-        synchronized (responses){
+    public void handleResponse(ByteBuffer response) {
+        synchronized (responses) {
             responses.add(response);
         }
         incrementProcessed();
         server.queueSend(socket);
     }
 
-    public LinkedList<ByteBuffer> getResponses(){
+    public LinkedList<ByteBuffer> getResponses() {
         LinkedList<ByteBuffer> out = new LinkedList<>();
-        synchronized (responses){
-            while(!responses.isEmpty()){
+        synchronized (responses) {
+            while (!responses.isEmpty()) {
                 out.add(responses.poll());
             }
         }
         return out;
     }
 
-    private synchronized void incrementProcessed(){
+    private synchronized void incrementProcessed() {
         processed++;
     }
 
-    public synchronized int getTasksProcessed(){
+    public synchronized int getTasksProcessed() {
         int temp = processed;
         processed = 0;
         return temp;

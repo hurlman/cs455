@@ -12,8 +12,14 @@ public class Util {
 
     public static int randInt(int min, int max) {
 
-
         return rand.nextInt((max - min) + 1) + min;
+    }
+
+    public static byte[] randBytes(int size){
+
+        byte[] b = new byte[size];
+        rand.nextBytes(b);
+        return b;
     }
 
     public static String SHA1FromBytes(byte[] data) {

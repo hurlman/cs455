@@ -5,6 +5,7 @@ package cs455.scaling.server;
 import cs455.scaling.thread.ThreadPoolManager;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -41,16 +42,17 @@ public class Server implements Runnable {
         serverSocket.bind(new InetSocketAddress(port));
         serverSocket.configureBlocking(false);
         serverSocket.register(selector, SelectionKey.OP_ACCEPT);
+
+        System.out.println(String.format("Server open, listening on %s:%s",
+                InetAddress.getLocalHost(), port));
     }
 
     public void run() {
 
-
-        //noinspection InfiniteLoopStatement
         while (true) {
             try {
-                synchronized (socketsToWrite){
-                    for(SocketChannel s : socketsToWrite){
+                synchronized (socketsToWrite) {
+                    for (SocketChannel s : socketsToWrite) {
                         SelectionKey key = s.keyFor(selector);
                         key.interestOps(SelectionKey.OP_WRITE);
                     }
@@ -94,6 +96,7 @@ public class Server implements Runnable {
         csc.register(key.selector(), SelectionKey.OP_READ);
 
         clients.put(csc, new ClientConnection(csc, this, pool));
+        System.out.println("Client connected. " + csc.getRemoteAddress());
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -122,7 +125,7 @@ public class Server implements Runnable {
         SocketChannel sc = (SocketChannel) key.channel();
 
         LinkedList<ByteBuffer> queue = clients.get(sc).getResponses();
-        while(!queue.isEmpty()){
+        while (!queue.isEmpty()) {
             sc.write(queue.poll());
         }
         key.interestOps(SelectionKey.OP_READ);

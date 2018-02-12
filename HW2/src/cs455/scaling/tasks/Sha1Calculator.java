@@ -16,7 +16,7 @@ public class Sha1Calculator implements ClientTask {
     }
 
     @Override
-    public void runClientTask(){
+    public void runClientTask() {
         String response = Util.SHA1FromBytes(data);
         ByteBuffer buf = ByteBuffer.wrap(response.getBytes());
         sender.handleResponse(buf);

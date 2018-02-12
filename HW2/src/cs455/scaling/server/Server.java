@@ -49,6 +49,7 @@ public class Server implements Runnable {
 
     public void run() {
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             try {
                 synchronized (socketsToWrite) {
@@ -125,8 +126,8 @@ public class Server implements Runnable {
         SocketChannel sc = (SocketChannel) key.channel();
 
         LinkedList<ByteBuffer> queue = clients.get(sc).getResponses();
-        while (!queue.isEmpty()) {
-            sc.write(queue.poll());
+        for (ByteBuffer buf : queue) {
+            sc.write(buf);
         }
         key.interestOps(SelectionKey.OP_READ);
     }
@@ -135,7 +136,7 @@ public class Server implements Runnable {
         synchronized (socketsToWrite) {
             socketsToWrite.add(socket);
         }
-        selector.wakeup();
+        selector.wakeup();  //TODO Do we need this?
     }
 
     private void removeClients() {

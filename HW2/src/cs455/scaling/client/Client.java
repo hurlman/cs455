@@ -25,7 +25,7 @@ public class Client implements Runnable {
     private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
     private final LinkedList<ByteBuffer> dataToSend = new LinkedList<>();
     private final LinkedList<String> hashes = new LinkedList<>();
-    private SocketChannel socket;
+    private SocketChannel socketChannel;
 
     public static void main(String[] args) {
         try {
@@ -48,17 +48,14 @@ public class Client implements Runnable {
     public void run() {
         try {
 
-            SocketChannel sc = SocketChannel.open();
-            sc.configureBlocking(false);
-            sc.connect(new InetSocketAddress(serverIP, port));
-            sc.register(selector, SelectionKey.OP_CONNECT);
+            socketChannel = SocketChannel.open();
+            socketChannel.configureBlocking(false);
+            socketChannel.connect(new InetSocketAddress(serverIP, port));
+            socketChannel.register(selector, SelectionKey.OP_CONNECT);
 
+            //noinspection InfiniteLoopStatement
             while (true) {
 
-                if(!dataToSend.isEmpty()){
-                    SelectionKey key = socket.keyFor(selector);
-                    key.interestOps(SelectionKey.OP_WRITE);
-                }
 
                 selector.select();
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
@@ -149,8 +146,17 @@ public class Client implements Runnable {
                 synchronized (hashes) {
                     hashes.add(hash);
                 }
+                wakeUpSelector();
                 System.out.println("Generating new data: " + hash.substring(0, 8));
             }
         }, 1000 / rate, 1000 / rate);
+    }
+
+    private void wakeUpSelector() {
+
+        SelectionKey key = this.socketChannel.keyFor(selector);
+        key.interestOps(SelectionKey.OP_WRITE);
+        selector.wakeup();  //TODO Do we need this?
+
     }
 }

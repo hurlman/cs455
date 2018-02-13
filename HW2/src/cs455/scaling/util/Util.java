@@ -8,7 +8,9 @@ import java.util.Random;
 public class Util {
     private static Random rand = new Random();
 
-    public static final int BUFFER_SIZE = 8192;
+    public static final int DATA_SIZE = 1024 * 8;
+    public static final int SERVER_BUFFER_SIZE = 1024 * 16;
+    public static final int CLIENT_BUFFER_SIZE = 1024;
 
     public static int randInt(int min, int max) {
 

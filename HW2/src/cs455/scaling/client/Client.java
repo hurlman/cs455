@@ -1,8 +1,5 @@
 package cs455.scaling.client;
 
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
-import javax.jws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -12,9 +9,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
-import static cs455.scaling.util.Util.BUFFER_SIZE;
-import static cs455.scaling.util.Util.SHA1FromBytes;
-import static cs455.scaling.util.Util.randBytes;
+import static cs455.scaling.util.Util.*;
 
 public class Client implements Runnable {
 
@@ -22,7 +17,7 @@ public class Client implements Runnable {
     private int port;
     private int rate;
     private Selector selector;
-    private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+    private ByteBuffer readBuffer = ByteBuffer.allocate(CLIENT_BUFFER_SIZE);
     private final LinkedList<ByteBuffer> dataToSend = new LinkedList<>();
     private final LinkedList<String> hashes = new LinkedList<>();
     private SocketChannel socketChannel;
@@ -91,6 +86,8 @@ public class Client implements Runnable {
         if (sc.finishConnect()) {
             key.interestOps(SelectionKey.OP_WRITE);
             System.out.println("Connected to server!");
+            System.out.println("Send buffer: " + sc.socket().getSendBufferSize());
+            System.out.println("Receive buffer: " + sc.socket().getReceiveBufferSize());
             sendRandomData();
         } else
             key.cancel();
@@ -106,19 +103,21 @@ public class Client implements Runnable {
             throw new IOException("Socket was closed");
         }
         handleResponse(readBuffer.array(), numRead);
-        key.interestOps(SelectionKey.OP_WRITE);
     }
 
     private void write(SelectionKey key) throws IOException {
         SocketChannel sc = (SocketChannel) key.channel();
 
         synchronized (dataToSend) {
-            while (!dataToSend.isEmpty()) {
-                sc.write(dataToSend.poll());
-                System.out.println("Sent.");
+            if (!dataToSend.isEmpty()) {
+                for (ByteBuffer buf : dataToSend) {
+                    sc.write(buf);
+                    System.out.println("Sent.");
+                }
+                dataToSend.clear();
+                key.interestOps(SelectionKey.OP_READ);
             }
         }
-        key.interestOps(SelectionKey.OP_READ);
     }
 
     private void handleResponse(byte[] data, int count) {
@@ -138,7 +137,7 @@ public class Client implements Runnable {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                byte[] randomData = randBytes(BUFFER_SIZE);
+                byte[] randomData = randBytes(DATA_SIZE);
                 String hash = SHA1FromBytes(randomData);
                 synchronized (dataToSend) {
                     dataToSend.add(ByteBuffer.wrap(randomData));
@@ -156,7 +155,7 @@ public class Client implements Runnable {
 
         SelectionKey key = this.socketChannel.keyFor(selector);
         key.interestOps(SelectionKey.OP_WRITE);
-        selector.wakeup();  //TODO Do we need this?
+        selector.wakeup();
 
     }
 }

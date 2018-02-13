@@ -14,13 +14,13 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
-import static cs455.scaling.util.Util.BUFFER_SIZE;
+import static cs455.scaling.util.Util.SERVER_BUFFER_SIZE;
 
 public class Server implements Runnable {
 
     private Selector selector;
     private ThreadPoolManager pool;
-    private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+    private ByteBuffer readBuffer = ByteBuffer.allocate(SERVER_BUFFER_SIZE);
 
     private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
     private final LinkedList<SocketChannel> socketsToWrite = new LinkedList<>();
@@ -98,6 +98,8 @@ public class Server implements Runnable {
 
         clients.put(csc, new ClientConnection(csc, this, pool));
         System.out.println("Client connected. " + csc.getRemoteAddress());
+        System.out.println("Send buffer: " + csc.socket().getSendBufferSize());
+        System.out.println("Receive buffer: " + csc.socket().getReceiveBufferSize());
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -118,8 +120,8 @@ public class Server implements Runnable {
             key.cancel();
             return;
         }
-
-        clients.get(sc).setNewTask(readBuffer.array(), numRead);
+System.out.println(numRead);
+        clients.get(sc).handleData(readBuffer.array(), numRead);
     }
 
     private void write(SelectionKey key) throws IOException {
@@ -136,7 +138,7 @@ public class Server implements Runnable {
         synchronized (socketsToWrite) {
             socketsToWrite.add(socket);
         }
-        selector.wakeup();  //TODO Do we need this?
+        selector.wakeup();
     }
 
     private void removeClients() {

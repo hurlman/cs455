@@ -9,6 +9,8 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import static cs455.scaling.util.Util.DATA_SIZE;
+
 public class ClientConnection {
 
     private Server server;
@@ -17,16 +19,28 @@ public class ClientConnection {
     private SocketChannel socket;
     private int processed = 0;
 
+    byte[] dataIn = new byte[DATA_SIZE];
+    int index = 0;
+
     ClientConnection(SocketChannel socket, Server server, ThreadPoolManager pool) {
         this.socket = socket;
         this.server = server;
         this.pool = pool;
     }
 
-    public void setNewTask(byte[] newData, int numRead) {
-        byte[] dataIn = Arrays.copyOfRange(newData, 0, numRead);
-        Sha1Calculator task = new Sha1Calculator(this, dataIn);
-        pool.execute(task);
+    public void handleData(byte[] newData, int numRead) {
+        try {
+            System.arraycopy(newData, 0, dataIn, index, numRead);
+        }catch (IndexOutOfBoundsException e){
+            System.out.println("Data corrupted, discarding.");
+            index = 0;
+        }
+        index += numRead;
+        if(index == DATA_SIZE) {
+            Sha1Calculator task = new Sha1Calculator(this, dataIn);
+            pool.execute(task);
+            index = 0;
+        }
     }
 
     public void handleResponse(ByteBuffer response) {

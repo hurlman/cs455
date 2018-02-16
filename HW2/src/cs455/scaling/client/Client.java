@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.sql.Timestamp;
 import java.util.*;
 
 import static cs455.scaling.util.Util.*;
@@ -16,11 +17,14 @@ public class Client implements Runnable {
     private InetAddress serverIP;
     private int port;
     private int rate;
+    private int thread = -1;
     private Selector selector;
     private ByteBuffer readBuffer = ByteBuffer.allocate(CLIENT_BUFFER_SIZE);
     private final LinkedList<ByteBuffer> dataToSend = new LinkedList<>();
     private final LinkedList<String> hashes = new LinkedList<>();
     private SocketChannel socketChannel;
+    private int sentCount = 0;
+    private int receivedCount = 0;
 
     public static void main(String[] args) {
         try {
@@ -33,11 +37,19 @@ public class Client implements Runnable {
         }
     }
 
-    Client(InetAddress serverIP, int port, int rate) throws IOException {
+    private Client(InetAddress serverIP, int port, int rate) throws IOException {
         selector = Selector.open();
         this.serverIP = serverIP;
         this.port = port;
         this.rate = rate;
+    }
+
+    Client(InetAddress serverIP, int port, int rate, int thread) throws IOException {
+        selector = Selector.open();
+        this.serverIP = serverIP;
+        this.port = port;
+        this.rate = rate;
+        this.thread = thread;
     }
 
     public void run() {
@@ -85,10 +97,9 @@ public class Client implements Runnable {
 
         if (sc.finishConnect()) {
             key.interestOps(SelectionKey.OP_WRITE);
-            System.out.println("Connected to server!");
-            System.out.println("Send buffer: " + sc.socket().getSendBufferSize());
-            System.out.println("Receive buffer: " + sc.socket().getReceiveBufferSize());
+            log("Connected to server!");
             sendRandomData();
+            reportCounts();
         } else
             key.cancel();
     }
@@ -112,7 +123,7 @@ public class Client implements Runnable {
             if (!dataToSend.isEmpty()) {
                 for (ByteBuffer buf : dataToSend) {
                     sc.write(buf);
-                    System.out.println("Sent.");
+                    incrementDataSent();
                 }
                 dataToSend.clear();
                 key.interestOps(SelectionKey.OP_READ);
@@ -125,11 +136,31 @@ public class Client implements Runnable {
         String hash = new String(dataCopy);
         synchronized (hashes) {
             if (hashes.remove(hash)) {
-                System.out.println("Valid hash received! " + hash.substring(0, 8));
+                incrementDataReceived();
             } else {
-                System.out.println("WARNING! Unknown hash received. " + hash.substring(0, 8));
+                log("WARNING! Unknown hash received. " + hash.substring(0, 8));
             }
         }
+    }
+
+    private synchronized void incrementDataSent() {
+        sentCount++;
+    }
+
+    private synchronized int getAndResetSentCount() {
+        int temp = sentCount;
+        sentCount = 0;
+        return temp;
+    }
+
+    private synchronized void incrementDataReceived() {
+        receivedCount++;
+    }
+
+    private synchronized int getAndResetReceivedCount() {
+        int temp = receivedCount;
+        receivedCount = 0;
+        return temp;
     }
 
     private void sendRandomData() {
@@ -146,9 +177,19 @@ public class Client implements Runnable {
                     hashes.add(hash);
                 }
                 wakeUpSelector();
-                System.out.println("Generating new data: " + hash.substring(0, 8));
             }
         }, 1000 / rate, 1000 / rate);
+    }
+
+    private void reportCounts() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                log(String.format("Total Sent Count: %s, Total Received Count: %s",
+                        getAndResetSentCount(), getAndResetReceivedCount()));
+            }
+        }, 1000 * REPORT_INTERVAL, 1000 * REPORT_INTERVAL);
     }
 
     private void wakeUpSelector() {
@@ -156,6 +197,15 @@ public class Client implements Runnable {
         SelectionKey key = this.socketChannel.keyFor(selector);
         key.interestOps(SelectionKey.OP_WRITE);
         selector.wakeup();
+    }
 
+    private void log(String message) {
+        if (thread < 0) {
+            System.out.println(String.format("[%s] %s",
+                    new Timestamp(System.currentTimeMillis()), message));
+        } else {
+            System.out.println(String.format("[%s] Thread %s: %s",
+                    new Timestamp(System.currentTimeMillis()), thread, message));
+        }
     }
 }

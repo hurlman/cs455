@@ -11,6 +11,7 @@ public class Util {
     public static final int DATA_SIZE = 1024 * 8;
     public static final int SERVER_BUFFER_SIZE = 1024 * 16;
     public static final int CLIENT_BUFFER_SIZE = 1024;
+    public static final int REPORT_INTERVAL = 20;
 
     public static int randInt(int min, int max) {
 

@@ -12,8 +12,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.sql.Timestamp;
 import java.util.*;
 
+import static cs455.scaling.util.Util.REPORT_INTERVAL;
 import static cs455.scaling.util.Util.SERVER_BUFFER_SIZE;
 
 public class Server implements Runnable {
@@ -23,11 +25,12 @@ public class Server implements Runnable {
     private ByteBuffer readBuffer = ByteBuffer.allocate(SERVER_BUFFER_SIZE);
 
     private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
-    private final LinkedList<SocketChannel> socketsToWrite = new LinkedList<>();
+    private final Set<SocketChannel> socketsToWrite = new HashSet<>();
 
     public static void main(String args[]) {
         try {
             ThreadPoolManager pool = new ThreadPoolManager(Integer.parseInt(args[1]));
+            pool.initialize();
             new Thread(new Server(Integer.parseInt(args[0]), pool)).start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,6 +48,8 @@ public class Server implements Runnable {
 
         System.out.println(String.format("Server open, listening on %s:%s",
                 InetAddress.getLocalHost(), port));
+
+        reportThroughput();
     }
 
     public void run() {
@@ -98,8 +103,6 @@ public class Server implements Runnable {
 
         clients.put(csc, new ClientConnection(csc, this, pool));
         System.out.println("Client connected. " + csc.getRemoteAddress());
-        System.out.println("Send buffer: " + csc.socket().getSendBufferSize());
-        System.out.println("Receive buffer: " + csc.socket().getReceiveBufferSize());
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -120,7 +123,6 @@ public class Server implements Runnable {
             key.cancel();
             return;
         }
-System.out.println(numRead);
         clients.get(sc).handleData(readBuffer.array(), numRead);
     }
 
@@ -143,6 +145,52 @@ System.out.println(numRead);
 
     private void removeClients() {
         clients.keySet().removeIf(socket -> !socket.isOpen());
+    }
+
+    public void reportThroughput() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                calculateAndPrintThroughput();
+            }
+        }, 1000 * REPORT_INTERVAL, 1000 * REPORT_INTERVAL);
+    }
+
+    public void calculateAndPrintThroughput(){
+        int N = clients.size();
+        if(N > 0) {
+            List<Double> throughputs = new ArrayList<>();
+            synchronized (clients) {
+                for (ClientConnection client : clients.values()) {
+                    throughputs.add((double) client.getAndResetSentCount() / REPORT_INTERVAL);
+                }
+            }
+            double sum = 0;
+            for (double tp : throughputs) {
+                sum += tp;
+            }
+            double mean = sum / N;
+            double variance = 0;
+            for (double tp : throughputs) {
+                variance += Math.pow(tp - mean, 2);
+            }
+            double stD = Math.sqrt(variance / N);
+
+            System.out.printf("[%s] Server Throughput: %.2f messages/s, " +
+                            "Active Client Connections: %s, " +
+                            "Mean Per-client Throughput: %.2f messages/s, " +
+                            "Std. Dev. Of Per-client Throughput: %.2f messages/s\n",
+                    new Timestamp(System.currentTimeMillis()), sum, N,
+                    mean, stD);
+        }
+        else{
+            System.out.printf("[%s] Server Throughput: 0.0 messages/s, " +
+                            "Active Client Connections: 0, " +
+                            "Mean Per-client Throughput: 0.0 messages/s, " +
+                            "Std. Dev. Of Per-client Throughput: 0.0 messages/s\n",
+                    new Timestamp(System.currentTimeMillis()));
+        }
     }
 }
 

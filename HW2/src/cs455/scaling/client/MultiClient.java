@@ -11,7 +11,7 @@ public class MultiClient {
             int rate = Integer.parseInt(args[2]);
             int numClients = Integer.parseInt(args[3]);
             for (int i = 0; i < numClients; i++) {
-                new Thread(new Client(serverIP, port, rate)).start();
+                new Thread(new Client(serverIP, port, rate, i)).start();
             }
         } catch (IOException e) {
             e.printStackTrace();

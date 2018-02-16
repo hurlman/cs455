@@ -2,11 +2,9 @@ package cs455.scaling.server;
 
 import cs455.scaling.tasks.Sha1Calculator;
 import cs455.scaling.thread.ThreadPoolManager;
-import cs455.scaling.util.Util;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 import static cs455.scaling.util.Util.DATA_SIZE;
@@ -17,10 +15,10 @@ public class ClientConnection {
     private ThreadPoolManager pool;
     private final LinkedList<ByteBuffer> responses = new LinkedList<>();
     private SocketChannel socket;
-    private int processed = 0;
+    private int sentCount = 0;
 
-    byte[] dataIn = new byte[DATA_SIZE];
-    int index = 0;
+    private byte[] dataIn = new byte[DATA_SIZE];
+    private int index = 0;
 
     ClientConnection(SocketChannel socket, Server server, ThreadPoolManager pool) {
         this.socket = socket;
@@ -31,12 +29,12 @@ public class ClientConnection {
     public void handleData(byte[] newData, int numRead) {
         try {
             System.arraycopy(newData, 0, dataIn, index, numRead);
-        }catch (IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             System.out.println("Data corrupted, discarding.");
             index = 0;
         }
         index += numRead;
-        if(index == DATA_SIZE) {
+        if (index == DATA_SIZE) {
             Sha1Calculator task = new Sha1Calculator(this, dataIn);
             pool.execute(task);
             index = 0;
@@ -47,7 +45,6 @@ public class ClientConnection {
         synchronized (responses) {
             responses.add(response);
         }
-        incrementProcessed();
         server.queueSend(socket);
     }
 
@@ -56,18 +53,19 @@ public class ClientConnection {
         synchronized (responses) {
             while (!responses.isEmpty()) {
                 out.add(responses.poll());
+                incrementSentCount();
             }
         }
         return out;
     }
 
-    private synchronized void incrementProcessed() {
-        processed++;
+    private synchronized void incrementSentCount() {
+        sentCount++;
     }
 
-    public synchronized int getTasksProcessed() {
-        int temp = processed;
-        processed = 0;
+    public synchronized int getAndResetSentCount() {
+        int temp = sentCount;
+        sentCount = 0;
         return temp;
     }
 }

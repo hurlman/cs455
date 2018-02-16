@@ -9,18 +9,27 @@ public class ThreadPoolManager {
     private final LinkedList<ClientTask> tasks = new LinkedList<>();
     private volatile boolean run;
     private final Object mutex = new Object();
+    private int threadCount;
+    private WorkerThread[] threads;
 
     public ThreadPoolManager(int threadCount) {
-        WorkerThread[] threads = new WorkerThread[threadCount];
-
+        this.threadCount = threadCount;
         run = true;
+        threads = new WorkerThread[threadCount];
+
+    }
+
+    public void initialize(){
 
         for (int i = 0; i < threadCount; i++) {
             threads[i] = new WorkerThread();
             threads[i].setName("Worker thread " + i);
             threads[i].start();
         }
+    }
 
+    public void stop(){
+        run = false;
     }
 
     public void execute(ClientTask task) {

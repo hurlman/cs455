@@ -8,6 +8,7 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 
 import static cs455.scaling.util.Util.DATA_SIZE;
+import static cs455.scaling.util.Util.SERVER_BUFFER_SIZE;
 
 public class ClientConnection {
 
@@ -17,8 +18,8 @@ public class ClientConnection {
     private SocketChannel socket;
     private int sentCount = 0;
 
-    private byte[] dataIn = new byte[DATA_SIZE];
-    private int index = 0;
+    private ByteBuffer channelBuffer = ByteBuffer.allocateDirect(SERVER_BUFFER_SIZE);
+    private byte[] dataToHash = new byte[DATA_SIZE];
 
     ClientConnection(SocketChannel socket, Server server, ThreadPoolManager pool) {
         this.socket = socket;
@@ -27,18 +28,18 @@ public class ClientConnection {
     }
 
     public void handleData(byte[] newData, int numRead) {
-        try {
-            System.arraycopy(newData, 0, dataIn, index, numRead);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("Data corrupted, discarding.");
-            index = 0;
+        channelBuffer.put(newData, 0, numRead);
+        while (channelBuffer.position() > DATA_SIZE){
+            channelBuffer.flip();
+            channelBuffer.get(dataToHash);
+            hashIt();
+            channelBuffer.compact();
         }
-        index += numRead;
-        if (index == DATA_SIZE) {
-            Sha1Calculator task = new Sha1Calculator(this, dataIn);
-            pool.execute(task);
-            index = 0;
-        }
+    }
+
+    private void hashIt(){
+        Sha1Calculator task = new Sha1Calculator(this, dataToHash);
+        task.runClientTask();
     }
 
     public void handleResponse(ByteBuffer response) {

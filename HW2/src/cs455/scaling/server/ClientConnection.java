@@ -18,7 +18,7 @@ public class ClientConnection {
     private SocketChannel socket;
     private int sentCount = 0;
 
-    private ByteBuffer channelBuffer = ByteBuffer.allocateDirect(SERVER_BUFFER_SIZE);
+    public ByteBuffer channelBuffer = ByteBuffer.allocateDirect(SERVER_BUFFER_SIZE);
     private byte[] dataToHash = new byte[DATA_SIZE];
 
     ClientConnection(SocketChannel socket, Server server, ThreadPoolManager pool) {
@@ -27,8 +27,7 @@ public class ClientConnection {
         this.pool = pool;
     }
 
-    public void handleData(byte[] newData, int numRead) {
-        channelBuffer.put(newData, 0, numRead);
+    public void handleData() {
         while (channelBuffer.position() > DATA_SIZE){
             channelBuffer.flip();
             channelBuffer.get(dataToHash);
@@ -39,7 +38,7 @@ public class ClientConnection {
 
     private void hashIt(){
         Sha1Calculator task = new Sha1Calculator(this, dataToHash);
-        task.runClientTask();
+        pool.execute(task);
     }
 
     public void handleResponse(ByteBuffer response) {

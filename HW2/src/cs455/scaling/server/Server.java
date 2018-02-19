@@ -22,7 +22,6 @@ public class Server implements Runnable {
 
     private Selector selector;
     private ThreadPoolManager pool;
-    private ByteBuffer readBuffer = ByteBuffer.allocate(SERVER_BUFFER_SIZE);
 
     private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
     private final Set<SocketChannel> socketsToWrite = new HashSet<>();
@@ -107,10 +106,9 @@ public class Server implements Runnable {
 
     private void read(SelectionKey key) throws IOException {
         SocketChannel sc = (SocketChannel) key.channel();
-        readBuffer.clear();
         int numRead;
         try {
-            numRead = sc.read(readBuffer);
+            numRead = sc.read(clients.get(sc).channelBuffer);
         } catch (IOException e) {
             sc.close();
             clients.remove(sc);
@@ -123,7 +121,7 @@ public class Server implements Runnable {
             key.cancel();
             return;
         }
-        clients.get(sc).handleData(readBuffer.array(), numRead);
+        clients.get(sc).handleData();
     }
 
     private void write(SelectionKey key) throws IOException {

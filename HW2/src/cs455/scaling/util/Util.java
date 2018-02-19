@@ -9,7 +9,7 @@ public class Util {
     private static Random rand = new Random();
 
     public static final int DATA_SIZE = 1024 * 8;
-    public static final int SERVER_BUFFER_SIZE = 1024 * 64;
+    public static final int SERVER_BUFFER_SIZE = 1024 * 128;
     public static final int CLIENT_BUFFER_SIZE = 1024;
     public static final int REPORT_INTERVAL = 20;
 

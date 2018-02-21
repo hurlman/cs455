@@ -1,22 +1,16 @@
 package cs455.scaling.server;
 
-//import cs455.scaling.tasks.TestClientTask;
-
 import cs455.scaling.thread.ThreadPoolManager;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.sql.Timestamp;
 import java.util.*;
 
 import static cs455.scaling.util.Util.REPORT_INTERVAL;
-import static cs455.scaling.util.Util.SERVER_BUFFER_SIZE;
 
 public class Server implements Runnable {
 
@@ -24,7 +18,6 @@ public class Server implements Runnable {
     private ThreadPoolManager pool;
 
     private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
-    private final Set<SocketChannel> socketsToWrite = new HashSet<>();
 
     public static void main(String args[]) {
         try {
@@ -56,15 +49,8 @@ public class Server implements Runnable {
         //noinspection InfiniteLoopStatement
         while (true) {
             try {
-                synchronized (socketsToWrite) {
-                    for (SocketChannel s : socketsToWrite) {
-                        SelectionKey key = s.keyFor(selector);
-                        key.interestOps(SelectionKey.OP_WRITE);
-                    }
-                    socketsToWrite.clear();
-                }
 
-                selector.select();  //blocking
+                selector.select();
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
                 while (it.hasNext()) {
 
@@ -100,7 +86,7 @@ public class Server implements Runnable {
         csc.configureBlocking(false);
         csc.register(key.selector(), SelectionKey.OP_READ);
 
-        clients.put(csc, new ClientConnection(csc, this, pool));
+        clients.put(csc, new ClientConnection(pool));
         System.out.println("Client connected. " + csc.getRemoteAddress());
     }
 
@@ -122,6 +108,7 @@ public class Server implements Runnable {
             return;
         }
         clients.get(sc).handleData();
+        key.interestOps(SelectionKey.OP_WRITE);
     }
 
     private void write(SelectionKey key) throws IOException {
@@ -134,18 +121,11 @@ public class Server implements Runnable {
         key.interestOps(SelectionKey.OP_READ);
     }
 
-    public void queueSend(SocketChannel socket) {
-        synchronized (socketsToWrite) {
-            socketsToWrite.add(socket);
-        }
-        selector.wakeup();
-    }
-
     private void removeClients() {
         clients.keySet().removeIf(socket -> !socket.isOpen());
     }
 
-    public void reportThroughput() {
+    private void reportThroughput() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -155,9 +135,9 @@ public class Server implements Runnable {
         }, 1000 * REPORT_INTERVAL, 1000 * REPORT_INTERVAL);
     }
 
-    public void calculateAndPrintThroughput(){
+    private void calculateAndPrintThroughput() {
         int N = clients.size();
-        if(N > 0) {
+        if (N > 0) {
             List<Double> throughputs = new ArrayList<>();
             synchronized (clients) {
                 for (ClientConnection client : clients.values()) {
@@ -181,8 +161,7 @@ public class Server implements Runnable {
                             "Std. Dev. Of Per-client Throughput: %.2f messages/s\n",
                     new Timestamp(System.currentTimeMillis()), sum, N,
                     mean, stD);
-        }
-        else{
+        } else {
             System.out.printf("[%s] Server Throughput: 0.0 messages/s, " +
                             "Active Client Connections: 0, " +
                             "Mean Per-client Throughput: 0.0 messages/s, " +
@@ -191,32 +170,3 @@ public class Server implements Runnable {
         }
     }
 }
-
-
-//    private static void reportThreadUsage() {
-//
-//        for (Map.Entry e : tracker.entrySet()) {
-//            System.out.println(e.getKey() + ": " + e.getValue());
-//        }
-//    }
-//
-//    public synchronized static void countThreadUsage(String threadName) {
-//        tracker.merge(threadName, 1, (a, b) -> a + b);
-//    }
-
-//            for (int i = 0; i < 100; i++) {
-//                pool.execute(new TestClientTask());
-//
-//                try {
-//                    Thread.sleep(10);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            try {
-//                Thread.sleep(102);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            reportThreadUsage();

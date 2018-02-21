@@ -12,23 +12,19 @@ import static cs455.scaling.util.Util.SERVER_BUFFER_SIZE;
 
 public class ClientConnection {
 
-    private Server server;
     private ThreadPoolManager pool;
     private final LinkedList<ByteBuffer> responses = new LinkedList<>();
-    private SocketChannel socket;
     private int sentCount = 0;
 
-    public ByteBuffer channelBuffer = ByteBuffer.allocateDirect(SERVER_BUFFER_SIZE);
+    public ByteBuffer channelBuffer = ByteBuffer.allocate(SERVER_BUFFER_SIZE);
     private byte[] dataToHash = new byte[DATA_SIZE];
 
-    ClientConnection(SocketChannel socket, Server server, ThreadPoolManager pool) {
-        this.socket = socket;
-        this.server = server;
+    ClientConnection(ThreadPoolManager pool) {
         this.pool = pool;
     }
 
     public void handleData() {
-        while (channelBuffer.position() > DATA_SIZE){
+        while (channelBuffer.position() >= DATA_SIZE){
             channelBuffer.flip();
             channelBuffer.get(dataToHash);
             hashIt();
@@ -45,7 +41,6 @@ public class ClientConnection {
         synchronized (responses) {
             responses.add(response);
         }
-        server.queueSend(socket);
     }
 
     public LinkedList<ByteBuffer> getResponses() {

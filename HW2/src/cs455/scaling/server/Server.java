@@ -1,11 +1,11 @@
 package cs455.scaling.server;
 
+import cs455.scaling.tasks.ChannelWorker;
 import cs455.scaling.thread.ThreadPoolManager;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.sql.Timestamp;
 import java.util.*;
@@ -27,7 +27,6 @@ public class Server implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private Server(int port, ThreadPoolManager pool) throws IOException {
@@ -64,15 +63,11 @@ public class Server implements Runnable {
                             accept(key);
                         } else if (key.isReadable()) {
                             read(key);
-                        } else if (key.isWritable()) {
-                            write(key);
                         }
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                    removeClients();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -86,43 +81,25 @@ public class Server implements Runnable {
         csc.configureBlocking(false);
         csc.register(key.selector(), SelectionKey.OP_READ);
 
-        clients.put(csc, new ClientConnection(pool));
+        synchronized (clients) {
+            clients.put(csc, new ClientConnection());
+        }
         System.out.println("Client connected. " + csc.getRemoteAddress());
     }
 
-    private void read(SelectionKey key) throws IOException {
+    private void read(SelectionKey key) {
         SocketChannel sc = (SocketChannel) key.channel();
-        int numRead;
-        try {
-            numRead = sc.read(clients.get(sc).channelBuffer);
-        } catch (IOException e) {
-            sc.close();
-            clients.remove(sc);
-            key.cancel();
-            return;
+        synchronized (clients) {
+            ChannelWorker cw = new ChannelWorker(key, clients.get(sc), this);
+            key.interestOps(0);
+            pool.execute(cw);
         }
-        if (numRead == -1) {
-            sc.close();
-            clients.remove(sc);
-            key.cancel();
-            return;
-        }
-        clients.get(sc).handleData();
-        key.interestOps(SelectionKey.OP_WRITE);
     }
 
-    private void write(SelectionKey key) throws IOException {
-        SocketChannel sc = (SocketChannel) key.channel();
-
-        LinkedList<ByteBuffer> queue = clients.get(sc).getResponses();
-        for (ByteBuffer buf : queue) {
-            sc.write(buf);
+    public void removeClient(SocketChannel sc) {
+        synchronized (clients) {
+            clients.remove(sc);
         }
-        key.interestOps(SelectionKey.OP_READ);
-    }
-
-    private void removeClients() {
-        clients.keySet().removeIf(socket -> !socket.isOpen());
     }
 
     private void reportThroughput() {
@@ -136,14 +113,15 @@ public class Server implements Runnable {
     }
 
     private void calculateAndPrintThroughput() {
-        int N = clients.size();
-        if (N > 0) {
-            List<Double> throughputs = new ArrayList<>();
-            synchronized (clients) {
-                for (ClientConnection client : clients.values()) {
-                    throughputs.add((double) client.getAndResetSentCount() / REPORT_INTERVAL);
-                }
+        int N;
+        List<Double> throughputs = new ArrayList<>();
+        synchronized (clients) {
+            N = clients.keySet().size();
+            for (ClientConnection client : clients.values()) {
+                throughputs.add((double) client.getAndResetSentCount() / REPORT_INTERVAL);
             }
+        }
+        if (N > 0) {
             double sum = 0;
             for (double tp : throughputs) {
                 sum += tp;

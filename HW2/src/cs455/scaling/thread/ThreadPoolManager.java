@@ -2,6 +2,7 @@ package cs455.scaling.thread;
 
 import cs455.scaling.tasks.ClientTask;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ThreadPoolManager {
@@ -56,6 +57,8 @@ public class ThreadPoolManager {
                         task.runClientTask();
                     }
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }

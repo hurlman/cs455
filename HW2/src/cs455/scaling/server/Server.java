@@ -116,7 +116,7 @@ public class Server implements Runnable {
         int N;
         List<Double> throughputs = new ArrayList<>();
         synchronized (clients) {
-            N = clients.keySet().size();
+            N = clients.size();
             for (ClientConnection client : clients.values()) {
                 throughputs.add((double) client.getAndResetSentCount() / REPORT_INTERVAL);
             }

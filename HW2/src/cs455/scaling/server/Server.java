@@ -119,9 +119,10 @@ public class Server implements Runnable {
         SocketChannel sc = (SocketChannel) key.channel();
         // Locks data structure to retrieve ClientConnection object for channel.
         synchronized (clients) {
+            // Create new task.
             ChannelWorker cw = new ChannelWorker(key, clients.get(sc), this);
             key.interestOps(0);
-            pool.execute(cw);
+            pool.execute(cw);   // Execute task with thread pool.
         }
     }
 

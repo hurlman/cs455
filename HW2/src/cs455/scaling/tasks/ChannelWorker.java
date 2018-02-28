@@ -42,6 +42,8 @@ public class ChannelWorker implements IClientTask {
         int numRead;
         byte[] dataToHash = new byte[DATA_SIZE];
         List<ByteBuffer> responses = new ArrayList<>();  // To store multiple responses if necessary.
+
+        // Locks ClientConnection object for this socket channel.
         synchronized (client) {
 
             try {
@@ -69,7 +71,7 @@ public class ChannelWorker implements IClientTask {
             try {
                 for (ByteBuffer response : responses) {
                     sc.write(response);                             // Write responses back to channel.
-                    client.incrementSentCount();                    // Inform ClientConnection of send
+                    client.incrementSentCount();                    // Inform ClientConnection of send.
                 }
             } catch (IOException e) {
                 sc.close();
@@ -77,7 +79,6 @@ public class ChannelWorker implements IClientTask {
                 server.removeClient(sc);
                 return;
             }
-            // of responses sent.
             key.interestOps(SelectionKey.OP_READ);                  // Make key readable again.
         }
     }

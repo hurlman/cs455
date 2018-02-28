@@ -1,63 +1,35 @@
 package cs455.scaling.server;
 
-import cs455.scaling.tasks.Sha1Calculator;
-import cs455.scaling.thread.ThreadPoolManager;
-
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.util.LinkedList;
 
-import static cs455.scaling.util.Util.DATA_SIZE;
 import static cs455.scaling.util.Util.SERVER_BUFFER_SIZE;
 
+/**
+ * Class that maintains read buffer and sent count for each client socket channel.
+ * This object is also used for locking to prevent multiple threads from acting on the same
+ * socket channel.
+ */
 public class ClientConnection {
 
-    private ThreadPoolManager pool;
-    private final LinkedList<ByteBuffer> responses = new LinkedList<>();
     private int sentCount = 0;
 
+    /**
+     * Buffer that is read into from the client channel.  This buffer will hold remainders of
+     * incomplete messages that were read so that it is available for the next time the
+     * channel is read from.
+     */
     public ByteBuffer channelBuffer = ByteBuffer.allocate(SERVER_BUFFER_SIZE);
-    private byte[] dataToHash = new byte[DATA_SIZE];
 
-    ClientConnection(ThreadPoolManager pool) {
-        this.pool = pool;
-    }
-
-    public void handleData() {
-        while (channelBuffer.position() >= DATA_SIZE){
-            channelBuffer.flip();
-            channelBuffer.get(dataToHash);
-            hashIt();
-            channelBuffer.compact();
-        }
-    }
-
-    private void hashIt(){
-        Sha1Calculator task = new Sha1Calculator(this, dataToHash);
-        pool.execute(task);
-    }
-
-    public void handleResponse(ByteBuffer response) {
-        synchronized (responses) {
-            responses.add(response);
-        }
-    }
-
-    public LinkedList<ByteBuffer> getResponses() {
-        LinkedList<ByteBuffer> out = new LinkedList<>();
-        synchronized (responses) {
-            while (!responses.isEmpty()) {
-                out.add(responses.poll());
-                incrementSentCount();
-            }
-        }
-        return out;
-    }
-
-    private synchronized void incrementSentCount() {
+    /**
+     * Method for thread to call to track responses sent on this channel.
+     */
+    public synchronized void incrementSentCount() {
         sentCount++;
     }
 
+    /**
+     * Method for server to call to get the current sent count, and resets it.
+     */
     public synchronized int getAndResetSentCount() {
         int temp = sentCount;
         sentCount = 0;

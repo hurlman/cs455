@@ -1,24 +1,33 @@
 package cs455.scaling.server;
 
+import cs455.scaling.tasks.ChannelWorker;
 import cs455.scaling.thread.ThreadPoolManager;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.sql.Timestamp;
 import java.util.*;
 
 import static cs455.scaling.util.Util.REPORT_INTERVAL;
 
+/**
+ * Server class.  Serves clients using a thread pool.
+ */
 public class Server implements Runnable {
 
     private Selector selector;
     private ThreadPoolManager pool;
 
+    // Collection of client socket channels and ClientConnection objects.
+    // Contains state information, read buffers and provides locking object.
     private final Map<SocketChannel, ClientConnection> clients = new HashMap<>();
 
+    /**
+     * Main initializes thread pool and passes it to server class.
+     * Command line arguments are listening port and number of threads. Starts server thread.
+     */
     public static void main(String args[]) {
         try {
             ThreadPoolManager pool = new ThreadPoolManager(Integer.parseInt(args[1]));
@@ -27,9 +36,12 @@ public class Server implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Constructor provides server with thread pool, port.  Initializes server socket channel
+     * and selector, begins reporting task timer.
+     */
     private Server(int port, ThreadPoolManager pool) throws IOException {
         this.pool = pool;
         selector = Selector.open();
@@ -44,6 +56,9 @@ public class Server implements Runnable {
         reportThroughput();
     }
 
+    /**
+     * Server selector loop.
+     */
     public void run() {
 
         //noinspection InfiniteLoopStatement
@@ -60,19 +75,17 @@ public class Server implements Runnable {
                         if (!key.isValid()) {
                             continue;
                         }
+                        // While loop only contains accept and read.  Write was determined to be
+                        // unnecessary in testing.
                         if (key.isAcceptable()) {
                             accept(key);
                         } else if (key.isReadable()) {
                             read(key);
-                        } else if (key.isWritable()) {
-                            write(key);
                         }
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                    removeClients();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -80,51 +93,53 @@ public class Server implements Runnable {
         }
     }
 
+    /**
+     * Accepts socket connection, creates and registers client channel with selector.
+     * Adds socket channel to clients data structure.
+     */
     private void accept(SelectionKey key) throws IOException {
         ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
         SocketChannel csc = ssc.accept();
         csc.configureBlocking(false);
         csc.register(key.selector(), SelectionKey.OP_READ);
 
-        clients.put(csc, new ClientConnection(pool));
+        // Locks data structure when adding new clients.
+        synchronized (clients) {
+            clients.put(csc, new ClientConnection());
+        }
         System.out.println("Client connected. " + csc.getRemoteAddress());
     }
 
-    private void read(SelectionKey key) throws IOException {
+    /**
+     * Creates task and sends it to the thread pool for processing when a client socket channel
+     * is readable.  Interest Ops are removed from this key so that another thread does not try
+     * to read from it in the next loop until task is complete.
+     */
+    private void read(SelectionKey key) {
         SocketChannel sc = (SocketChannel) key.channel();
-        int numRead;
-        try {
-            numRead = sc.read(clients.get(sc).channelBuffer);
-        } catch (IOException e) {
-            sc.close();
+        // Locks data structure to retrieve ClientConnection object for channel.
+        synchronized (clients) {
+            // Create new task.
+            ChannelWorker cw = new ChannelWorker(key, clients.get(sc), this);
+            key.interestOps(0);
+            pool.execute(cw);   // Execute task with thread pool.
+        }
+    }
+
+    /**
+     * Provides a way for a thread to remove a client socket channel from the clients collection
+     * when the socket disconnects.
+     */
+    public void removeClient(SocketChannel sc) {
+        // Locks data structure to remove clients.
+        synchronized (clients) {
             clients.remove(sc);
-            key.cancel();
-            return;
         }
-        if (numRead == -1) {
-            sc.close();
-            clients.remove(sc);
-            key.cancel();
-            return;
-        }
-        clients.get(sc).handleData();
-        key.interestOps(SelectionKey.OP_WRITE);
     }
 
-    private void write(SelectionKey key) throws IOException {
-        SocketChannel sc = (SocketChannel) key.channel();
-
-        LinkedList<ByteBuffer> queue = clients.get(sc).getResponses();
-        for (ByteBuffer buf : queue) {
-            sc.write(buf);
-        }
-        key.interestOps(SelectionKey.OP_READ);
-    }
-
-    private void removeClients() {
-        clients.keySet().removeIf(socket -> !socket.isOpen());
-    }
-
+    /**
+     * Creates reporting task to be run every REPORT_INTERVAL seconds.
+     */
     private void reportThroughput() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -135,15 +150,23 @@ public class Server implements Runnable {
         }, 1000 * REPORT_INTERVAL, 1000 * REPORT_INTERVAL);
     }
 
+    /**
+     * Called by reportThroughput to perform calculations and print to screen.
+     * clients data structure is used to determine number of connected clients and obtain their
+     * counts since the last call.
+     */
     private void calculateAndPrintThroughput() {
-        int N = clients.size();
-        if (N > 0) {
-            List<Double> throughputs = new ArrayList<>();
-            synchronized (clients) {
-                for (ClientConnection client : clients.values()) {
-                    throughputs.add((double) client.getAndResetSentCount() / REPORT_INTERVAL);
-                }
+        int N;
+        List<Double> throughputs = new ArrayList<>();
+        // Locks data structure to get current size and iterate over each client to get and
+        // reset message counts.
+        synchronized (clients) {
+            N = clients.size();
+            for (ClientConnection client : clients.values()) {
+                throughputs.add((double) client.getAndResetSentCount() / REPORT_INTERVAL);
             }
+        }
+        if (N > 0) {
             double sum = 0;
             for (double tp : throughputs) {
                 sum += tp;
@@ -159,9 +182,8 @@ public class Server implements Runnable {
                             "Active Client Connections: %s, " +
                             "Mean Per-client Throughput: %.2f messages/s, " +
                             "Std. Dev. Of Per-client Throughput: %.2f messages/s\n",
-                    new Timestamp(System.currentTimeMillis()), sum, N,
-                    mean, stD);
-        } else {
+                    new Timestamp(System.currentTimeMillis()), sum, N, mean, stD);
+        } else { // Needed to avoid divide by 0 situation.
             System.out.printf("[%s] Server Throughput: 0.0 messages/s, " +
                             "Active Client Connections: 0, " +
                             "Mean Per-client Throughput: 0.0 messages/s, " +

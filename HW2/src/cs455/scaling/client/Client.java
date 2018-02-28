@@ -1,6 +1,7 @@
 package cs455.scaling.client;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,6 +13,10 @@ import java.util.*;
 
 import static cs455.scaling.util.Util.*;
 
+/**
+ * Main client class.  Connects to sever and sends random 8kB data at rate R.
+ * Calculates hash of random data and waits for and compares it to server response.
+ */
 public class Client implements Runnable {
 
     private InetAddress serverIP;
@@ -26,6 +31,9 @@ public class Client implements Runnable {
     private int sentCount = 0;
     private int receivedCount = 0;
 
+    /**
+     * Begins a single client thread.
+     */
     public static void main(String[] args) {
         try {
             InetAddress serverIP = InetAddress.getByName(args[0]);
@@ -37,6 +45,9 @@ public class Client implements Runnable {
         }
     }
 
+    /**
+     * Private constructor for single thread use.  Sets server info, rate, and initializes selector.
+     */
     private Client(InetAddress serverIP, int port, int rate) throws IOException {
         selector = Selector.open();
         this.serverIP = serverIP;
@@ -44,6 +55,9 @@ public class Client implements Runnable {
         this.rate = rate;
     }
 
+    /**
+     * Constructor overload for MultiClient use.  Tracks client thread in logging.
+     */
     Client(InetAddress serverIP, int port, int rate, int thread) throws IOException {
         selector = Selector.open();
         this.serverIP = serverIP;
@@ -55,6 +69,7 @@ public class Client implements Runnable {
     public void run() {
         try {
 
+            // Create socket channel, begin connection to server and register with selector.
             socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
             socketChannel.connect(new InetSocketAddress(serverIP, port));
@@ -92,6 +107,10 @@ public class Client implements Runnable {
         }
     }
 
+    /**
+     * Completes connection to server if channel is connectable.  Begins tasks of generating random
+     * data and reporting sent/received counts.
+     */
     private void connect(SelectionKey key) throws IOException {
         SocketChannel sc = (SocketChannel) key.channel();
 
@@ -104,18 +123,31 @@ public class Client implements Runnable {
             key.cancel();
     }
 
+    /**
+     * If channel is readable, reads into the readBuffer.  Pops hashes off the buffer and
+     * compacts it.
+     */
     private void read(SelectionKey key) throws IOException {
         SocketChannel sc = (SocketChannel) key.channel();
-        readBuffer.clear();
+        byte[] data = new byte[20];
         int numRead = sc.read(readBuffer);
         if (numRead < 0) {
             key.channel().close();
             key.cancel();
             throw new IOException("Socket was closed");
         }
-        handleResponse(readBuffer.array(), numRead);
+        while (readBuffer.position() >= 20) {
+            readBuffer.flip();
+            readBuffer.get(data);
+            readBuffer.compact();
+            handleResponse(data);
+        }
     }
 
+    /**
+     * If channel is writeable, writes all ByteBuffers that are queued to send.
+     * Increments sent counter.  Sets interestOps back to OP_READ for the key.
+     */
     private void write(SelectionKey key) throws IOException {
         SocketChannel sc = (SocketChannel) key.channel();
 
@@ -131,9 +163,14 @@ public class Client implements Runnable {
         }
     }
 
-    private void handleResponse(byte[] data, int count) {
-        byte[] dataCopy = Arrays.copyOfRange(data, 0, count);
-        String hash = new String(dataCopy);
+    /**
+     * Converts the 20 byte hash to a string to compare to the linked list of hashes sent.
+     * removes from list if there is a match.  Logs if it's a mismatch.  Increments received count.
+     */
+    private void handleResponse(byte[] data) {
+
+        BigInteger hashInt = new BigInteger(1, data);
+        String hash = hashInt.toString(16);
         synchronized (hashes) {
             if (hashes.remove(hash)) {
                 incrementDataReceived();
@@ -163,6 +200,10 @@ public class Client implements Runnable {
         return temp;
     }
 
+    /**
+     * Queues random 8kB of data to send to the server at rate/s interval.  Computes hash
+     * of data and adds to linked list of hashes.  Notifies selector channel has data to write.
+     */
     private void sendRandomData() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -181,6 +222,10 @@ public class Client implements Runnable {
         }, 1000 / rate, 1000 / rate);
     }
 
+    /**
+     * Writes to screen number of messages sent and received last REPORT_INTERVAL seconds.
+     * Resets counts.
+     */
     private void reportCounts() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -192,6 +237,10 @@ public class Client implements Runnable {
         }, 1000 * REPORT_INTERVAL, 1000 * REPORT_INTERVAL);
     }
 
+    /**
+     * Sets interestOps to OP_WRITE for the key for this client's socket channel.
+     * Wakes up selector if it was blocking.
+     */
     private void wakeUpSelector() {
 
         SelectionKey key = this.socketChannel.keyFor(selector);
@@ -199,6 +248,9 @@ public class Client implements Runnable {
         selector.wakeup();
     }
 
+    /**
+     * Prepends thread number if running in MultiClient mode.
+     */
     private void log(String message) {
         if (thread < 0) {
             System.out.println(String.format("[%s] %s",

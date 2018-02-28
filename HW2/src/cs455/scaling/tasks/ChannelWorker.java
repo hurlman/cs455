@@ -13,13 +13,22 @@ import java.util.List;
 
 import static cs455.scaling.util.Util.DATA_SIZE;
 
-public class ChannelWorker implements ClientTask {
+/**
+ * Class that represents tasks created by server to handle each client request.
+ */
+public class ChannelWorker implements IClientTask {
 
 
     private final SelectionKey key;
     private final ClientConnection client;
     private Server server;
 
+    /**
+     * Constructor takes channel key, ClientConnection object and reference back to server.
+     * ClientConnection object holds read buffer and method to increment counts for the channel,
+     * and server reference allows for call to method to remove channel from clients data structure if
+     * socket is closed.
+     */
     public ChannelWorker(SelectionKey key, ClientConnection client, Server server) {
 
         this.key = key;
@@ -32,14 +41,14 @@ public class ChannelWorker implements ClientTask {
         SocketChannel sc = (SocketChannel) key.channel();
         int numRead;
         byte[] dataToHash = new byte[DATA_SIZE];
-        List<ByteBuffer> responses = new ArrayList<>();
+        List<ByteBuffer> responses = new ArrayList<>();  // To store multiple responses if necessary.
         synchronized (client) {
 
             try {
-                numRead = sc.read(client.channelBuffer);
+                numRead = sc.read(client.channelBuffer); // Read from channel into ClientConnection buffer.
             } catch (IOException e) {
-                sc.close();
-                key.cancel();
+                sc.close();                              // If socket was closed, clean up everything
+                key.cancel();                            // and remove references to client objects.
                 server.removeClient(sc);
                 return;
             }
@@ -49,27 +58,27 @@ public class ChannelWorker implements ClientTask {
                 server.removeClient(sc);
                 return;
             }
-            while (client.channelBuffer.position() >= DATA_SIZE) {
-                client.channelBuffer.flip();
-                client.channelBuffer.get(dataToHash);
-                client.channelBuffer.compact();
-                String hash = Util.SHA1FromBytes(dataToHash);
-                ByteBuffer buf = ByteBuffer.wrap(hash.getBytes());
-                responses.add(buf);
+            while (client.channelBuffer.position() >= DATA_SIZE) {  // Loop over every set of complete data
+                client.channelBuffer.flip();                        // Flip to read mode.
+                client.channelBuffer.get(dataToHash);               // Get client data from read buffer.
+                client.channelBuffer.compact();                     // Compact read buffer.
+                byte[] hash = Util.getSHA1(dataToHash);             // Perform hash.
+                ByteBuffer buf = ByteBuffer.wrap(hash);             // Prepare hash for send.
+                responses.add(buf);                                 // Add to send list.
             }
-            ByteBuffer[] responseBufs = new ByteBuffer[responses.size()];
-            responses.toArray(responseBufs);
             try {
-                sc.write(responseBufs);
+                for (ByteBuffer response : responses) {
+                    sc.write(response);                             // Write responses back to channel.
+                    client.incrementSentCount();                    // Inform ClientConnection of send
+                }
             } catch (IOException e) {
                 sc.close();
                 key.cancel();
                 server.removeClient(sc);
                 return;
             }
-            client.incrementSentCount(responseBufs.length);
-
-            key.interestOps(SelectionKey.OP_READ);
+            // of responses sent.
+            key.interestOps(SelectionKey.OP_READ);                  // Make key readable again.
         }
     }
 }

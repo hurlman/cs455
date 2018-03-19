@@ -1,4 +1,4 @@
-package cs455.hadoop.airline;
+package cs455.hadoop.airline.q16;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;

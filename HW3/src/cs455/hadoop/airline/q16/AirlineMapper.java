@@ -1,4 +1,4 @@
-package cs455.hadoop.airline;
+package cs455.hadoop.airline.q16;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -14,6 +14,13 @@ public class AirlineMapper extends Mapper<LongWritable, Text, Text,IntWritable> 
         String record = value.toString();
         String recordData[] = record.split("\\s*,\\s*");
 
-        context.write(new Text(recordData[5]), new IntWritable(Integer.parseInt(recordData[14])));
+        int delayMin;
+        try{
+            delayMin = Integer.parseInt(recordData[14]);
+        }catch(NumberFormatException ne){
+            delayMin = 0;
+        }
+
+        context.write(new Text(recordData[5]), new IntWritable(delayMin));
     }
 }

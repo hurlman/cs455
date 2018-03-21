@@ -1,9 +1,9 @@
 package cs455.hadoop.airline.q16;
 
+import cs455.hadoop.airline.KeyType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -21,7 +21,7 @@ public class AirlineJob {
             job.setMapperClass(AirlineMapper.class);
             job.setReducerClass(AirlineReducer.class);
 
-            job.setOutputKeyClass(Text.class);
+            job.setOutputKeyClass(KeyType.class);
             job.setOutputValueClass(IntWritable.class);
 
             FileInputFormat.addInputPath(job, new Path(args[0]));

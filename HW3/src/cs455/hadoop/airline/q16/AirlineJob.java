@@ -24,6 +24,9 @@ public class AirlineJob {
             job.setOutputKeyClass(KeyType.class);
             job.setOutputValueClass(IntWritable.class);
 
+            // Increases speed but output is unsorted.
+            job.setNumReduceTasks(10);
+
             FileInputFormat.addInputPath(job, new Path(args[0]));
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
 

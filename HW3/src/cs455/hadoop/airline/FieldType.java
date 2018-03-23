@@ -1,5 +1,6 @@
 package cs455.hadoop.airline;
 
+
 public enum FieldType {
     TIME_OF_DAY(1, "Time"),
     DAY_OF_WEEK(2, "Day"),
@@ -21,12 +22,34 @@ public enum FieldType {
         return _id;
     }
 
-    public static String getFriendlyName(int i){
+    public String getName(){
+        return _name;
+    }
+
+    public static String getName(int i){
         for(FieldType a : FieldType.values()){
             if(a.getId() == i){
                 return a._name;
             }
         }
         return "";
+    }
+
+    public static FieldType getFieldType(int i){
+        for(FieldType a : FieldType.values()){
+            if(a.getId() == i){
+                return a;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public static FieldType getFieldType(String s){
+        for(FieldType a : FieldType.values()){
+            if(a.getName().equals(s)){
+                return a;
+            }
+        }
+        throw new IllegalArgumentException();
     }
 }

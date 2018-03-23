@@ -14,8 +14,11 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritab
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         RecordData rec = new RecordData(value);
 
+        // Questions 1 and 2
         try {
             context.write(rec.getDepTime(), rec.getDepDelay());
+            context.write(rec.getDepDay(), rec.getDepDelay());
+            context.write(rec.getDepMonth(), rec.getDepDelay());
         } catch (Exception e) {
             e.printStackTrace();
         }

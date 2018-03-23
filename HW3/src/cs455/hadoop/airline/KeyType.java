@@ -29,9 +29,13 @@ public class KeyType implements WritableComparable {
         _value = new Text(value);
     }
 
+    public int getCategory(){
+        return _category.get();
+    }
+
     @Override
     public String toString() {
-        return FieldType.getFriendlyName(_category.get()) + ": " + _value;
+        return FieldType.getName(_category.get()) + ": " + _value;
     }
 
     @Override

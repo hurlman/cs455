@@ -4,10 +4,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,25 +38,31 @@ public final class Dictionary {
 
         //TODO: Fix this crap
         FileSystem fs = FileSystem.get(conf);
-        FSDataInputStream inputStream = fs.open(new Path(AIRPORTS));
-        inputStream.
-
-        List<String> airportFile = Files.readAllLines(Paths.get(AIRPORTS));
+        FSDataInputStream ais = fs.open(new Path(AIRPORTS));
+        List<String> airportFile = IOUtils.readLines(ais);
         for (String data : airportFile) {
             Airport airport = new Airport(data);
             airports.put(airport.getIata(), airport);
         }
-        List<String> carrierFile = Files.readAllLines(Paths.get(CARRIERS));
+        ais.close();
+
+        FSDataInputStream cis = fs.open(new Path(CARRIERS));
+        List<String> carrierFile = IOUtils.readLines(cis);
         for (String data : carrierFile) {
             String split[] = data.split("\\s*,\\s*");
             carriers.put(split[0], split[1]);
         }
-        List<String> planeFile = Files.readAllLines(Paths.get(PLANES));
+        cis.close();
+
+        FSDataInputStream pis = fs.open(new Path(PLANES));
+        List<String> planeFile = IOUtils.readLines(pis);
         planeFile.removeIf(x -> !x.contains(","));      // Remove incomplete records.
         for(String data : planeFile){
             Plane plane = new Plane(data);
             planes.put(plane.getTailnum(), plane);
         }
+        pis.close();
+        fs.close();
     }
 
     public String getCarrier(String code){

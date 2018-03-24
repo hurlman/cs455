@@ -1,14 +1,15 @@
-package cs455.hadoop.airline;
+package cs455.hadoop.types;
 
 
 public enum FieldType {
     TIME_OF_DAY(1, "Time"),
     DAY_OF_WEEK(2, "Day"),
     MONTH_OF_YEAR(3, "Month"),
-    AIRPORT(4, "Airport"),
-    CARRIER(5, "Carrier"),
+    CARRIER_TOT(4, "Carrier-Num-Delays"),
+    CARRIER_AVG(5, "Carrier-Avg-Delay"),
     PLANE(6, "Plane"),
-    WEATHER_CITY(7, "City");
+    WEATHER_CITY(7, "City-Weather-Delay"),
+    AIRPORT(8, "Airport-by-Year");
 
     private final int _id;
     private final String _name;

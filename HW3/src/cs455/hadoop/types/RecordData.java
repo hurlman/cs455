@@ -1,26 +1,58 @@
-package cs455.hadoop.airline;
+package cs455.hadoop.types;
 
+import cs455.hadoop.util.Airport;
+import cs455.hadoop.util.Dictionary;
+import cs455.hadoop.util.Plane;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 public class RecordData {
 
     private String _record[];
+    private int _depDelay;
 
-    public RecordData(Text recordData ){
-        _record = recordData.toString().split("\\s*,\\s*");
+    public RecordData() {
     }
 
-    public KeyType getDepTime(){
+    public void setRecord(Text recordData) {
+        _record = recordData.toString().split("\\s*,\\s*");
+        try {
+            _depDelay = Integer.parseInt(_record[15]);
+        } catch (NumberFormatException e) {
+            _depDelay = 0;
+        }
+    }
+
+    public KeyType getDepTime() {
         int time = Integer.parseInt(_record[5]);
         time -= time % 100;
         return new KeyType(FieldType.TIME_OF_DAY, String.format("%04d", time));
     }
 
-    public KeyType getDepDay(){
+    public String getCarrier() {
+        return Dictionary.getInstance().getCarrier(_record[8]);
+    }
+
+    public Airport getOriginAirport() {
+        return Dictionary.getInstance().getAirport(_record[16]);
+    }
+
+    public Airport getDestAirport() {
+        return Dictionary.getInstance().getAirport(_record[17]);
+    }
+
+    public Plane getPlane() {
+        return Dictionary.getInstance().getPlane(_record[10]);
+    }
+
+    public String getYear() {
+        return _record[0];
+    }
+
+    public KeyType getDepDay() {
         int day = Integer.parseInt(_record[3]);
         String sDay = "";
-        switch (day){
+        switch (day) {
             case 1:
                 sDay = "Monday";
                 break;
@@ -46,10 +78,10 @@ public class RecordData {
         return new KeyType(FieldType.DAY_OF_WEEK, sDay);
     }
 
-    public KeyType getDepMonth(){
+    public KeyType getDepMonth() {
         int month = Integer.parseInt(_record[1]);
         String sMonth = "";
-        switch (month){
+        switch (month) {
             case 1:
                 sMonth = "January";
                 break;
@@ -90,13 +122,31 @@ public class RecordData {
 
     }
 
-    public IntWritable getDepDelay(){
+    public IntWritable getDepDelay() {
+        return new IntWritable(_depDelay);
+    }
+
+    public boolean isDelayed() {
+        return _depDelay > 0;
+    }
+
+    public boolean arrivedLate() {
         int i;
-        try{
-            i = Integer.parseInt(_record[15]);
-        }catch (NumberFormatException e){
+        try {
+            i = Integer.parseInt(_record[14]);
+        } catch (NumberFormatException e) {
             i = 0;
         }
-        return new IntWritable(i);
+        return i > 0;
+    }
+
+    public boolean hasWeatherDelay() {
+        int i;
+        try {
+            i = Integer.parseInt(_record[25]);
+        } catch (NumberFormatException e) {
+            i = 0;
+        }
+        return i > 0;
     }
 }

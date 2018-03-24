@@ -1,7 +1,7 @@
-package cs455.hadoop.airline.q16;
+package cs455.hadoop.airline;
 
-import cs455.hadoop.airline.FieldType;
-import cs455.hadoop.airline.KeyType;
+import cs455.hadoop.types.FieldType;
+import cs455.hadoop.types.KeyType;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -14,17 +14,20 @@ public class AirlineReducer extends Reducer<KeyType, IntWritable, KeyType, IntWr
             case TIME_OF_DAY:
             case DAY_OF_WEEK:
             case MONTH_OF_YEAR:
+            case CARRIER_AVG:
+            case PLANE:
                 WriteAverage(key, values, context);
                 break;
             case AIRPORT:
-                break;
-            case CARRIER:
-                break;
-            case PLANE:
-                break;
+            case CARRIER_TOT:
             case WEATHER_CITY:
+                WriteTotal(key, values, context);
                 break;
         }
+    }
+
+    private void WriteTotal(KeyType key, Iterable<IntWritable> values, Context context) {
+
     }
 
     private void WriteAverage(KeyType key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {

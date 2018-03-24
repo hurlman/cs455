@@ -1,6 +1,7 @@
-package cs455.hadoop.airline.q16;
+package cs455.hadoop.airline;
 
-import cs455.hadoop.airline.KeyType;
+import cs455.hadoop.types.KeyType;
+import cs455.hadoop.util.Dictionary;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -15,8 +16,7 @@ public class AirlineJob {
     public static void main(String[] args) {
         try {
             Configuration conf = new Configuration();
-
-            // TODO: Create Auxiliary Data dictionary
+            Dictionary.getInstance().initialize(conf);
 
             // First job makes pass over source data.
 

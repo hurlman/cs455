@@ -15,6 +15,11 @@ public class AirlineJob {
     public static void main(String[] args) {
         try {
             Configuration conf = new Configuration();
+
+            // TODO: Create Auxiliary Data dictionary
+
+            // First job makes pass over source data.
+
             Job job = Job.getInstance(conf, "airline");
             job.setJarByClass(AirlineJob.class);
 
@@ -25,12 +30,17 @@ public class AirlineJob {
             job.setOutputValueClass(IntWritable.class);
 
             // Increases speed but output is unsorted.
-            //job.setNumReduceTasks(10);
+            job.setNumReduceTasks(12);
 
             FileInputFormat.addInputPath(job, new Path(args[0]));
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
-            System.exit(job.waitForCompletion(true) ? 0 : 1);
+            job.waitForCompletion(true);
+
+            // Second runs on output of first job.  Flips kvp, sorts.
+
+
+
         } catch (IOException | InterruptedException | ClassNotFoundException e) {
             System.err.println(e.getMessage());
         }

@@ -11,28 +11,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class Dictionary {
+public class Dictionary {
 
     // TODO: Config file?
     private final String AIRPORTS = "/data/supplementary/airports.csv";
     private final String CARRIERS = "/data/supplementary/carriers.csv";
     private final String PLANES = "/data/supplementary/plane-data.csv";
 
-    private Map<String, String> carriers = new HashMap<>();
-    private Map<String, Airport> airports = new HashMap<>();
-    private Map<String, Plane> planes = new HashMap<>();
-
-    private static final Dictionary INSTANCE = new Dictionary();
-
-    private Dictionary() {
-        if (INSTANCE != null) {
-            throw new IllegalStateException("Already instantiated");
-        }
-    }
-
-    public static Dictionary getInstance() {
-        return INSTANCE;
-    }
+    public Map<String, String> carriers = new HashMap<>();
+    public Map<String, Airport> airports = new HashMap<>();
+    public Map<String, Plane> planes = new HashMap<>();
 
     public void initialize(Configuration conf) throws IOException {
 

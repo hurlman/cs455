@@ -10,8 +10,10 @@ public class RecordData {
 
     private String _record[];
     private int _depDelay;
+    private Dictionary _dict;
 
-    public RecordData() {
+    public RecordData(Dictionary dict) {
+    _dict = dict;
     }
 
     public void setRecord(Text recordData) {
@@ -30,19 +32,19 @@ public class RecordData {
     }
 
     public String getCarrier() {
-        return Dictionary.getInstance().getCarrier(_record[8]);
+        return _dict.getCarrier(_record[8]);
     }
 
     public Airport getOriginAirport() {
-        return Dictionary.getInstance().getAirport(_record[16]);
+        return _dict.getAirport(_record[16]);
     }
 
     public Airport getDestAirport() {
-        return Dictionary.getInstance().getAirport(_record[17]);
+        return _dict.getAirport(_record[17]);
     }
 
     public Plane getPlane() {
-        return Dictionary.getInstance().getPlane(_record[10]);
+        return _dict.getPlane(_record[10]);
     }
 
     public String getYear() {

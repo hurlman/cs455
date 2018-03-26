@@ -26,8 +26,12 @@ public class AirlineReducer extends Reducer<KeyType, IntWritable, KeyType, IntWr
         }
     }
 
-    private void WriteTotal(KeyType key, Iterable<IntWritable> values, Context context) {
-
+    private void WriteTotal(KeyType key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+        int total = 0;
+        for(IntWritable val : values){
+            total += val.get();
+        }
+        context.write(key, new IntWritable(total));
     }
 
     private void WriteAverage(KeyType key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {

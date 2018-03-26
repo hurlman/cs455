@@ -3,6 +3,8 @@ package cs455.hadoop.airline;
 import cs455.hadoop.types.FieldType;
 import cs455.hadoop.types.KeyType;
 import cs455.hadoop.types.RecordData;
+import cs455.hadoop.util.Dictionary;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -11,8 +13,18 @@ import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 
 public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritable> {
-    RecordData rec = new RecordData();
-    IntWritable one = new IntWritable(1);
+    RecordData rec;
+    IntWritable one;
+    Dictionary dict;
+
+    @Override
+    protected void setup(Context context) throws IOException {
+        Configuration conf = context.getConfiguration();
+        dict = new Dictionary();
+        dict.initialize(conf);
+        rec = new RecordData(dict);
+        one = new IntWritable(1);
+    }
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -63,9 +75,9 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritab
                 context.write(new KeyType(FieldType.WEATHER_CITY, destCity), one);
             }
 
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }

@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.Map;
 
 public class MapTest extends Mapper<LongWritable, Text, Text, Text> {
-    RecordData rec;
-    IntWritable one;
     Dictionary dict;
     boolean once;
 
@@ -24,8 +22,6 @@ public class MapTest extends Mapper<LongWritable, Text, Text, Text> {
         Configuration conf = context.getConfiguration();
         dict = new Dictionary();
         dict.initialize(conf);
-        rec = new RecordData(dict);
-        one = new IntWritable(1);
         once = false;
     }
 
@@ -33,6 +29,7 @@ public class MapTest extends Mapper<LongWritable, Text, Text, Text> {
     protected void map(LongWritable key, Text value, Mapper.Context context) throws IOException, InterruptedException {
         try {
             if (!once) {
+                once = true;
                 for (Map.Entry<String, String> c : dict.carriers.entrySet()) {
                     context.write(new Text(c.getKey()), new Text(c.getValue()));
                 }
@@ -46,7 +43,6 @@ public class MapTest extends Mapper<LongWritable, Text, Text, Text> {
                             "%s, %s", A.getValue().getTailnum(),
                             A.getValue().isOld("2000"))));
                 }
-                once = true;
             }
 
 

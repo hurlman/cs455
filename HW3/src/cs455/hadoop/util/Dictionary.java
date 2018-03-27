@@ -7,20 +7,20 @@ import org.apache.hadoop.fs.Path;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Dictionary {
 
     // TODO: Config file?
-    private final String AIRPORTS = "/data/supplementary/airports.csv";
-    private final String CARRIERS = "/data/supplementary/carriers.csv";
-    private final String PLANES = "/data/supplementary/plane-data.csv";
+    private final static String AIRPORTS = "/data/supplementary/airports.csv";
+    private final static String CARRIERS = "/data/supplementary/carriers.csv";
+    private final static String PLANES = "/data/supplementary/plane-data.csv";
 
-    public Map<String, String> carriers = new HashMap<>();
-    public Map<String, Airport> airports = new HashMap<>();
-    public Map<String, Plane> planes = new HashMap<>();
+    public Map<String, String> carriers = new ConcurrentHashMap<>();
+    public Map<String, Airport> airports = new ConcurrentHashMap<>();
+    public Map<String, Plane> planes = new ConcurrentHashMap<>();
 
     public void initialize(Configuration conf) throws IOException {
 
@@ -30,7 +30,7 @@ public class Dictionary {
         List<String> airportFile = IOUtils.readLines(ais);
         for (String data : airportFile) {
             Airport airport = new Airport(data);
-            airports.put(airport.getIata(), airport);
+            airports.put(airport.getIata().toLowerCase().replace("\"",""), airport);
         }
         ais.close();
 
@@ -38,7 +38,7 @@ public class Dictionary {
         List<String> carrierFile = IOUtils.readLines(cis);
         for (String data : carrierFile) {
             String split[] = data.split("\\s*,\\s*");
-            carriers.put(split[0], split[1]);
+            carriers.put(split[0].toLowerCase().replace("\"",""), split[1]);
         }
         cis.close();
 
@@ -47,7 +47,7 @@ public class Dictionary {
         planeFile.removeIf(x -> !x.contains(","));      // Remove incomplete records.
         for(String data : planeFile){
             Plane plane = new Plane(data);
-            planes.put(plane.getTailnum(), plane);
+            planes.put(plane.getTailnum().toLowerCase().replace("\"",""), plane);
         }
         pis.close();
         fs.close();

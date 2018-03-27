@@ -12,11 +12,8 @@ public class RecordData {
     private int _depDelay;
     private Dictionary _dict;
 
-    public RecordData(Dictionary dict) {
-    _dict = dict;
-    }
-
-    public void setRecord(Text recordData) {
+    public RecordData(Dictionary dict, Text recordData) {
+        _dict = dict;
         _record = recordData.toString().split("\\s*,\\s*");
         try {
             _depDelay = Integer.parseInt(_record[15]);
@@ -32,19 +29,19 @@ public class RecordData {
     }
 
     public String getCarrier() {
-        return _dict.getCarrier(_record[8]);
+        return _dict.getCarrier(_record[8].toLowerCase());
     }
 
     public Airport getOriginAirport() {
-        return _dict.getAirport(_record[16]);
+        return _dict.getAirport(_record[16].toLowerCase());
     }
 
     public Airport getDestAirport() {
-        return _dict.getAirport(_record[17]);
+        return _dict.getAirport(_record[17].toLowerCase());
     }
 
     public Plane getPlane() {
-        return _dict.getPlane(_record[10]);
+        return _dict.getPlane(_record[10].toLowerCase());
     }
 
     public String getYear() {

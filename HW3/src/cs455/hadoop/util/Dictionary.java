@@ -18,13 +18,12 @@ public class Dictionary {
     private final static String CARRIERS = "/data/supplementary/carriers.csv";
     private final static String PLANES = "/data/supplementary/plane-data.csv";
 
-    public Map<String, String> carriers = new ConcurrentHashMap<>();
-    public Map<String, Airport> airports = new ConcurrentHashMap<>();
-    public Map<String, Plane> planes = new ConcurrentHashMap<>();
+    private Map<String, String> carriers = new ConcurrentHashMap<>();
+    private Map<String, Airport> airports = new ConcurrentHashMap<>();
+    private Map<String, Plane> planes = new ConcurrentHashMap<>();
 
     public void initialize(Configuration conf) throws IOException {
 
-        //TODO: Fix this crap
         FileSystem fs = FileSystem.get(conf);
         FSDataInputStream ais = fs.open(new Path(AIRPORTS));
         List<String> airportFile = IOUtils.readLines(ais);

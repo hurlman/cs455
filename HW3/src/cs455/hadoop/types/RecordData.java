@@ -25,6 +25,7 @@ public class RecordData {
     public KeyType getDepTime() {
         int time = Integer.parseInt(_record[5]);
         time -= time % 100;
+        if (time >= 2400) time = 0;
         return new KeyType(FieldType.TIME_OF_DAY, String.format("%04d", time));
     }
 

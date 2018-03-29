@@ -16,8 +16,6 @@ public class AirlineJob {
         try {
             Configuration conf = new Configuration();
 
-            // First job makes pass over source data.
-
             Job job = Job.getInstance(conf, "airline");
             job.setJarByClass(AirlineJob.class);
 
@@ -27,19 +25,10 @@ public class AirlineJob {
             job.setOutputKeyClass(KeyType.class);
             job.setOutputValueClass(IntWritable.class);
 
-            // Increases speed but output is unsorted.
-            job.setNumReduceTasks(12);
-
             FileInputFormat.addInputPath(job, new Path(args[0]));
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
-            job.waitForCompletion(true);
-
-
-            // Second runs on output of first job.  Flips kvp, sorts.
-
-
-
+            System.exit(job.waitForCompletion(true) ? 0 : 1);
         } catch (IOException | InterruptedException | ClassNotFoundException e) {
             System.err.println(e.getMessage());
         }

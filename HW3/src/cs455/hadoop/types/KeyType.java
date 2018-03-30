@@ -15,8 +15,8 @@ public class KeyType implements WritableComparable {
     private Text _value;
 
     public KeyType(KeyType key) {
-        _category = key._category;
-        _value = key._value;
+        _category = new IntWritable(key._category.get());
+        _value = new Text(key._value.toString());
     }
 
     public KeyType() {

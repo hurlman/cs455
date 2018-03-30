@@ -1,19 +1,18 @@
 package cs455.hadoop.airline;
 
 import cs455.hadoop.types.FieldType;
+import cs455.hadoop.types.IntPair;
 import cs455.hadoop.types.KeyType;
 import cs455.hadoop.types.RecordData;
 import cs455.hadoop.util.Dictionary;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
-public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritable> {
-    private IntWritable one;
+public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> {
     private Dictionary dict;
 
     @Override
@@ -21,7 +20,6 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritab
         Configuration conf = context.getConfiguration();
         dict = new Dictionary();
         dict.initialize(conf);
-        one = new IntWritable(1);
     }
 
     @Override
@@ -34,36 +32,36 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritab
             RecordData rec = new RecordData(dict, value);
 
             // Questions 1 and 2
-            context.write(rec.getDepTime(), rec.getDepDelay());
-            context.write(rec.getDepDay(), rec.getDepDelay());
-            context.write(rec.getDepMonth(), rec.getDepDelay());
+            context.write(rec.getDepTime(), new IntPair(rec.getDepDelay(), 1));
+            context.write(rec.getDepDay(), new IntPair(rec.getDepDelay(), 1));
+            context.write(rec.getDepMonth(), new IntPair(rec.getDepDelay(), 1));
 
             // Question 3
             if (rec.getDestAirport() != null) {
                 String destArptByYr = String.format("%s-%s",
                         rec.getYear(), rec.getDestAirport().getIata());
-                context.write(new KeyType(FieldType.AIRPORT, destArptByYr), one);
+                context.write(new KeyType(FieldType.AIRPORT, destArptByYr), new IntPair(1, 0));
             }
             if (rec.getOriginAirport() != null) {
                 String orgArptByYr = String.format("%s-%s",
                         rec.getYear(), rec.getOriginAirport().getIata());
-                context.write(new KeyType(FieldType.AIRPORT, orgArptByYr), one);
+                context.write(new KeyType(FieldType.AIRPORT, orgArptByYr), new IntPair(1, 0));
             }
 
             // Question 4
             if (rec.isDelayed()) {
                 context.write(new KeyType(FieldType.CARRIER_TOT,
-                        rec.getCarrier()), one);
+                        rec.getCarrier()), new IntPair(1, 0));
                 context.write(new KeyType(FieldType.CARRIER_AVG,
-                        rec.getCarrier()), rec.getDepDelay());
+                        rec.getCarrier()), new IntPair(rec.getDepDelay(), 1));
             }
 
             // Question 5
             if (rec.arrivedLate() && rec.getPlane() != null) {
                 if (rec.getPlane().isOld(rec.getYear())) {
-                    context.write(new KeyType(FieldType.PLANE, "OLD"), one);
+                    context.write(new KeyType(FieldType.PLANE, "OLD"), new IntPair(1, 0));
                 } else {
-                    context.write(new KeyType(FieldType.PLANE, "NEW"), one);
+                    context.write(new KeyType(FieldType.PLANE, "NEW"), new IntPair(1, 0));
                 }
             }
             // Question 6
@@ -71,12 +69,12 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntWritab
                 if (rec.getOriginAirport() != null) {
                     String orgCity = rec.getOriginAirport().getCity() + "-" +
                             rec.getOriginAirport().getState();
-                    context.write(new KeyType(FieldType.WEATHER_CITY, orgCity), one);
+                    context.write(new KeyType(FieldType.WEATHER_CITY, orgCity), new IntPair(1, 0));
                 }
                 if (rec.getDestAirport() != null) {
                     String destCity = rec.getDestAirport().getCity() + "-" +
                             rec.getOriginAirport().getState();
-                    context.write(new KeyType(FieldType.WEATHER_CITY, destCity), one);
+                    context.write(new KeyType(FieldType.WEATHER_CITY, destCity), new IntPair(1, 0));
                 }
             }
 

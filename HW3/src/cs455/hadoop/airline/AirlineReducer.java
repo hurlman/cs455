@@ -1,6 +1,7 @@
 package cs455.hadoop.airline;
 
 import cs455.hadoop.types.FieldType;
+import cs455.hadoop.types.IntPair;
 import cs455.hadoop.types.KeyType;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -8,7 +9,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 import java.util.*;
 
-public class AirlineReducer extends Reducer<KeyType, IntWritable, KeyType, IntWritable> {
+public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritable> {
 
     private final static int REPORT_COUNT = 10;
 
@@ -22,31 +23,31 @@ public class AirlineReducer extends Reducer<KeyType, IntWritable, KeyType, IntWr
     private Map<KeyType, IntWritable> arptMap = new HashMap<>();
 
     @Override
-    protected void reduce(KeyType key, Iterable<IntWritable> values, Context context) {
+    protected void reduce(KeyType key, Iterable<IntPair> values, Context context) {
         switch (FieldType.getFieldType(key.getCategory())) {
             case TIME_OF_DAY:
-                timeMap.put(key, getAverage(values));
+                timeMap.put(new KeyType(key), getAverage(values));
                 break;
             case DAY_OF_WEEK:
-                dayMap.put(key, getAverage(values));
+                dayMap.put(new KeyType(key), getAverage(values));
                 break;
             case MONTH_OF_YEAR:
-                monthMap.put(key, getAverage(values));
-                break;
-            case PLANE:
-                planeMap.put(key, getAverage(values));
+                monthMap.put(new KeyType(key), getAverage(values));
                 break;
             case CARRIER_AVG:
-                carrAvgMap.put(key, getAverage(values));
+                carrAvgMap.put(new KeyType(key), getAverage(values));
+                break;
+            case PLANE:
+                planeMap.put(new KeyType(key), getSum(values));
                 break;
             case CARRIER_TOT:
-                carrTotMap.put(key, getSum(values));
+                carrTotMap.put(new KeyType(key), getSum(values));
                 break;
             case WEATHER_CITY:
-                cityMap.put(key, getSum(values));
+                cityMap.put(new KeyType(key), getSum(values));
                 break;
             case AIRPORT:
-                arptMap.put(key, getSum(values));
+                arptMap.put(new KeyType(key), getSum(values));
                 break;
         }
     }
@@ -81,20 +82,20 @@ public class AirlineReducer extends Reducer<KeyType, IntWritable, KeyType, IntWr
         }
     }
 
-    private IntWritable getSum(Iterable<IntWritable> values) {
+    private IntWritable getSum(Iterable<IntPair> values) {
         int total = 0;
-        for (IntWritable val : values) {
-            total += val.get();
+        for (IntPair val : values) {
+            total += val.getFirst();
         }
         return new IntWritable(total);
     }
 
-    private IntWritable getAverage(Iterable<IntWritable> values) {
+    private IntWritable getAverage(Iterable<IntPair> values) {
         int totalDelay = 0;
         int numFlights = 0;
-        for (IntWritable val : values) {
-            totalDelay += val.get();
-            numFlights++;
+        for (IntPair val : values) {
+            totalDelay += val.getFirst();
+            numFlights += val.getSecond();
         }
         int averageDelay = totalDelay / numFlights;
         return new IntWritable(averageDelay);

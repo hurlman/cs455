@@ -3,7 +3,6 @@ package cs455.hadoop.types;
 import cs455.hadoop.util.Airport;
 import cs455.hadoop.util.Dictionary;
 import cs455.hadoop.util.Plane;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 public class RecordData {
@@ -122,8 +121,8 @@ public class RecordData {
 
     }
 
-    public IntWritable getDepDelay() {
-        return new IntWritable(_depDelay);
+    public int getDepDelay() {
+        return _depDelay;
     }
 
     public boolean isDelayed() {

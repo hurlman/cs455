@@ -1,5 +1,6 @@
 package cs455.hadoop.airline;
 
+import cs455.hadoop.types.IntPair;
 import cs455.hadoop.types.KeyType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -20,10 +21,17 @@ public class AirlineJob {
             job.setJarByClass(AirlineJob.class);
 
             job.setMapperClass(AirlineMapper.class);
+            job.setCombinerClass(AirlineCombiner.class);
             job.setReducerClass(AirlineReducer.class);
+
+            job.setMapOutputKeyClass(KeyType.class);
+            job.setMapOutputValueClass(IntPair.class);
 
             job.setOutputKeyClass(KeyType.class);
             job.setOutputValueClass(IntWritable.class);
+
+            // For testing faster.
+            job.setNumReduceTasks(12);
 
             FileInputFormat.addInputPath(job, new Path(args[0]));
             FileOutputFormat.setOutputPath(job, new Path(args[1]));

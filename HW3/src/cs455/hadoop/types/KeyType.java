@@ -14,22 +14,22 @@ public class KeyType implements WritableComparable {
     private IntWritable _category;
     private Text _value;
 
-    public KeyType(IntWritable category, Text value) {
-        _category = category;
-        _value = value;
+    public KeyType(KeyType key) {
+        _category = key._category;
+        _value = key._value;
     }
 
-    public KeyType(){
+    public KeyType() {
         _value = new Text();
         _category = new IntWritable();
     }
 
-    public KeyType(FieldType category, String value){
+    public KeyType(FieldType category, String value) {
         _category = new IntWritable(category.getId());
         _value = new Text(value);
     }
 
-    public int getCategory(){
+    public int getCategory() {
         return _category.get();
     }
 
@@ -44,7 +44,7 @@ public class KeyType implements WritableComparable {
 
         int cmp = _category.compareTo(kt._category);
 
-        if(cmp !=0){
+        if (cmp != 0) {
             return cmp;
         }
         return _value.compareTo(kt._value);

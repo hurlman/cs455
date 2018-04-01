@@ -39,12 +39,12 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> 
             // Question 3
             if (rec.getDestAirport() != null) {
                 String destArptByYr = String.format("%s-%s",
-                        rec.getYear(), rec.getDestAirport().getIata());
+                        rec.getYear(), rec.getDestAirport().getAirport());
                 context.write(new KeyType(FieldType.AIRPORT, destArptByYr), new IntPair(1, 0));
             }
             if (rec.getOriginAirport() != null) {
                 String orgArptByYr = String.format("%s-%s",
-                        rec.getYear(), rec.getOriginAirport().getIata());
+                        rec.getYear(), rec.getOriginAirport().getAirport());
                 context.write(new KeyType(FieldType.AIRPORT, orgArptByYr), new IntPair(1, 0));
             }
 

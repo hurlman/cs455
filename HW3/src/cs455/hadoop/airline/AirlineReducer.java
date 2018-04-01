@@ -53,7 +53,7 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
                 cityMap.put(new KeyType(key), getSum(values));
                 break;
             case AIRPORT:
-                arptMap.get(getYear(key) % Constants.NUMBER_OF_YEARS).put(
+                arptMap.get(getYear(key) - Constants.STARTING_YEAR).put(
                         new KeyType(key), getSum(values));
                 break;
         }
@@ -113,7 +113,7 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
     private int getYear(KeyType key) {
         String value = key.getValue();
         try {
-            return Integer.parseInt(value.substring(value.length() - 4));
+            return Integer.parseInt(value.substring(0, 4));
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }

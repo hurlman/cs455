@@ -9,4 +9,5 @@ public class Constants {
     public final static int REPORT_COUNT = 10;
 
     public final static int NUMBER_OF_YEARS = 22;
+    public final static int STARTING_YEAR = 1987;
 }

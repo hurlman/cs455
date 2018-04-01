@@ -30,9 +30,6 @@ public class AirlineJob {
             job.setOutputKeyClass(KeyType.class);
             job.setOutputValueClass(IntWritable.class);
 
-            // For testing faster.
-            job.setNumReduceTasks(12);
-
             FileInputFormat.addInputPath(job, new Path(args[0]));
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
 

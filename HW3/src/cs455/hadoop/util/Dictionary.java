@@ -13,11 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Dictionary {
 
-    // TODO: Config file?
-    private final static String AIRPORTS = "/data/supplementary/airports.csv";
-    private final static String CARRIERS = "/data/supplementary/carriers.csv";
-    private final static String PLANES = "/data/supplementary/plane-data.csv";
-
     private Map<String, String> carriers = new ConcurrentHashMap<>();
     private Map<String, Airport> airports = new ConcurrentHashMap<>();
     private Map<String, Plane> planes = new ConcurrentHashMap<>();
@@ -25,7 +20,7 @@ public class Dictionary {
     public void initialize(Configuration conf) throws IOException {
 
         FileSystem fs = FileSystem.get(conf);
-        FSDataInputStream ais = fs.open(new Path(AIRPORTS));
+        FSDataInputStream ais = fs.open(new Path(Constants.AIRPORTS));
         List<String> airportFile = IOUtils.readLines(ais);
         for (String data : airportFile) {
             Airport airport = new Airport(data);
@@ -33,7 +28,7 @@ public class Dictionary {
         }
         ais.close();
 
-        FSDataInputStream cis = fs.open(new Path(CARRIERS));
+        FSDataInputStream cis = fs.open(new Path(Constants.CARRIERS));
         List<String> carrierFile = IOUtils.readLines(cis);
         for (String data : carrierFile) {
             String split[] = data.split("\\s*,\\s*");
@@ -41,7 +36,7 @@ public class Dictionary {
         }
         cis.close();
 
-        FSDataInputStream pis = fs.open(new Path(PLANES));
+        FSDataInputStream pis = fs.open(new Path(Constants.PLANES));
         List<String> planeFile = IOUtils.readLines(pis);
         planeFile.removeIf(x -> !x.contains(","));      // Remove incomplete records.
         for(String data : planeFile){

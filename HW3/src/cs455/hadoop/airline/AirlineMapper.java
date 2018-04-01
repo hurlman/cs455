@@ -59,9 +59,11 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> 
             // Question 5
             if (rec.arrivedLate() && rec.getPlane() != null) {
                 if (rec.getPlane().isOld(rec.getYear())) {
-                    context.write(new KeyType(FieldType.PLANE, "OLD"), new IntPair(1, 0));
+                    context.write(new KeyType(FieldType.PLANE, "OLD"),
+                            new IntPair(rec.getDepDelay(), 1));
                 } else {
-                    context.write(new KeyType(FieldType.PLANE, "NEW"), new IntPair(1, 0));
+                    context.write(new KeyType(FieldType.PLANE, "NEW"),
+                            new IntPair(rec.getDepDelay(), 1));
                 }
             }
             // Question 6

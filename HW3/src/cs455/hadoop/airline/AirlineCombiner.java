@@ -17,9 +17,9 @@ public class AirlineCombiner extends Reducer<KeyType, IntPair, KeyType, IntPair>
             case DAY_OF_WEEK:
             case MONTH_OF_YEAR:
             case CARRIER_AVG:
+            case PLANE:
                 context.write(key, getSum(values));
                 break;
-            case PLANE:
             case CARRIER_TOT:
             case WEATHER_CITY:
             case AIRPORT:

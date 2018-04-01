@@ -3,6 +3,7 @@ package cs455.hadoop.airline;
 import cs455.hadoop.types.FieldType;
 import cs455.hadoop.types.IntPair;
 import cs455.hadoop.types.KeyType;
+import cs455.hadoop.util.Constants;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -11,8 +12,6 @@ import java.util.*;
 
 public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritable> {
 
-    private final static int REPORT_COUNT = 10;
-
     private Map<KeyType, IntWritable> timeMap = new HashMap<>();
     private Map<KeyType, IntWritable> dayMap = new HashMap<>();
     private Map<KeyType, IntWritable> monthMap = new HashMap<>();
@@ -20,7 +19,14 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
     private Map<KeyType, IntWritable> carrAvgMap = new HashMap<>();
     private Map<KeyType, IntWritable> carrTotMap = new HashMap<>();
     private Map<KeyType, IntWritable> cityMap = new HashMap<>();
-    private Map<KeyType, IntWritable> arptMap = new HashMap<>();
+    private List<Map<KeyType, IntWritable>> arptMap = new ArrayList<>();
+
+    @Override
+    protected void setup(Context context) {
+        for (int i = 0; i < Constants.NUMBER_OF_YEARS; i++){
+            arptMap.add(new HashMap<>());
+        }
+    }
 
     @Override
     protected void reduce(KeyType key, Iterable<IntPair> values, Context context) {
@@ -38,7 +44,7 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
                 carrAvgMap.put(new KeyType(key), getAverage(values));
                 break;
             case PLANE:
-                planeMap.put(new KeyType(key), getSum(values));
+                planeMap.put(new KeyType(key), getAverage(values));
                 break;
             case CARRIER_TOT:
                 carrTotMap.put(new KeyType(key), getSum(values));
@@ -47,7 +53,8 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
                 cityMap.put(new KeyType(key), getSum(values));
                 break;
             case AIRPORT:
-                arptMap.put(new KeyType(key), getSum(values));
+                arptMap.get(getYear(key) % Constants.NUMBER_OF_YEARS).put(
+                        new KeyType(key), getSum(values));
                 break;
         }
     }
@@ -58,10 +65,12 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
         writeSortedOut(dayMap, context);
         writeSortedOut(monthMap, context);
         writeSortedOut(planeMap, context);
-        writeSortedOut(carrAvgMap, REPORT_COUNT, context);
-        writeSortedOut(carrTotMap, REPORT_COUNT, context);
-        writeSortedOut(cityMap, REPORT_COUNT , context);
-        writeSortedOut(arptMap, REPORT_COUNT, context);
+        writeSortedOut(carrAvgMap, Constants.REPORT_COUNT, context);
+        writeSortedOut(carrTotMap, Constants.REPORT_COUNT, context);
+        writeSortedOut(cityMap, Constants.REPORT_COUNT, context);
+        for (Map<KeyType, IntWritable> map : arptMap) {
+            writeSortedOut(map, Constants.REPORT_COUNT, context);
+        }
     }
 
     private void writeSortedOut(Map<KeyType, IntWritable> unsortedMap, Context context)
@@ -99,6 +108,16 @@ public class AirlineReducer extends Reducer<KeyType, IntPair, KeyType, IntWritab
         }
         int averageDelay = totalDelay / numFlights;
         return new IntWritable(averageDelay);
+    }
+
+    private int getYear(KeyType key) {
+        String value = key.getValue();
+        try {
+            return Integer.parseInt(value.substring(value.length() - 4));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private Map<KeyType, IntWritable> sortDescending(Map<KeyType, IntWritable> map) {

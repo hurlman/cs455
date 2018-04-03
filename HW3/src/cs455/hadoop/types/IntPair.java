@@ -8,6 +8,11 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Custom class containing two integers, implementing WritableComparable so it can be used
+ * as a Value type for map/reduce/combine operations.  Needed for calculating averages
+ * when using a combiner.
+ */
 public class IntPair implements WritableComparable {
 
     private IntWritable first;

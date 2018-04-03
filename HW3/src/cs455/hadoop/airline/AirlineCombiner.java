@@ -7,6 +7,14 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
+/**
+ * Combiner class performs two separate functions, depending on key type.  Either totals or
+ * creates running sum and count for averaging in the reducer.  The combiner necessitated the
+ * creation of the custom IntPair value class for doing averages.
+ *
+ * The combiner DRAMATICALLY improved performance during the reduce phase, and did not slow
+ * down the map phase at all.
+ */
 public class AirlineCombiner extends Reducer<KeyType, IntPair, KeyType, IntPair> {
 
     @Override
@@ -17,18 +25,22 @@ public class AirlineCombiner extends Reducer<KeyType, IntPair, KeyType, IntPair>
             case DAY_OF_WEEK:
             case MONTH_OF_YEAR:
             case CARRIER_AVG:
-            case PLANE:
-                context.write(key, getSum(values));
+            case PLANE_AGE:
+                context.write(key, getRunningSum(values));
                 break;
             case CARRIER_TOT:
+            case CARRIER_MIN:
             case WEATHER_CITY:
             case AIRPORT:
+            case PLANE_MODEL:
+            case PLANE_MODEL_FLIGHTS:
+            case PLANE_NUMBER:
                 context.write(key, getTotal(values));
                 break;
         }
     }
 
-    private IntPair getSum(Iterable<IntPair> values) {
+    private IntPair getRunningSum(Iterable<IntPair> values) {
         int sum = 0;
         int total = 0;
         for (IntPair val : values) {

@@ -12,9 +12,20 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
+/**
+ * Mapper class.  For each line read, passes line into a Record class for parsing.
+ * Creates keys and values and writes to context based on the data.  Both the Key and Value
+ * are custom classes.  The key contains a data category, such as TIME_OF_DAY, and a value,
+ * such as '0900'.  The value is an Integer Pair.  A pair is needed for performing averages
+ * with a combiner.  A combiner was needed to dramatically improve performance.
+ */
 public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> {
     private Dictionary dict;
 
+    /**
+     * Initializing a dictionary of supplemental data (plane, airport, and carrier reference
+     * data).  This is passed into and used by the Record class.
+     */
     @Override
     protected void setup(Context context) throws IOException {
         Configuration conf = context.getConfiguration();
@@ -52,6 +63,8 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> 
             if (rec.isDelayed()) {
                 context.write(new KeyType(FieldType.CARRIER_TOT,
                         rec.getCarrier()), new IntPair(1, 0));
+                context.write(new KeyType(FieldType.CARRIER_MIN,
+                        rec.getCarrier()), new IntPair(rec.getDepDelay(), 0));
                 context.write(new KeyType(FieldType.CARRIER_AVG,
                         rec.getCarrier()), new IntPair(rec.getDepDelay(), 1));
             }
@@ -59,13 +72,14 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> 
             // Question 5
             if (rec.arrivedLate() && rec.getPlane() != null) {
                 if (rec.getPlane().isOld(rec.getYear())) {
-                    context.write(new KeyType(FieldType.PLANE, "OLD"),
+                    context.write(new KeyType(FieldType.PLANE_AGE, "OLD"),
                             new IntPair(rec.getDepDelay(), 1));
                 } else {
-                    context.write(new KeyType(FieldType.PLANE, "NEW"),
+                    context.write(new KeyType(FieldType.PLANE_AGE, "NEW"),
                             new IntPair(rec.getDepDelay(), 1));
                 }
             }
+
             // Question 6
             if (rec.hasWeatherDelay()) {
                 if (rec.getOriginAirport() != null) {
@@ -80,6 +94,15 @@ public class AirlineMapper extends Mapper<LongWritable, Text, KeyType, IntPair> 
                 }
             }
 
+            // Question 7
+            if (rec.getPlane() != null) {
+                context.write(new KeyType(FieldType.PLANE_NUMBER, rec.getPlane().getTailnum()),
+                        new IntPair(rec.getDistance(), 0));
+                context.write(new KeyType(FieldType.PLANE_MODEL, rec.getPlane().getModel()),
+                        new IntPair(rec.getDistance(), 0));
+                context.write(new KeyType(FieldType.PLANE_MODEL_FLIGHTS, rec.getPlane().getModel()),
+                        new IntPair(1, 0));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

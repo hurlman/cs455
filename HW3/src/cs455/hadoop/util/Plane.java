@@ -1,5 +1,9 @@
 package cs455.hadoop.util;
 
+/**
+ * Represents the plane data from the supplemental data set.  Parses lines of data from
+ * the plane-data.csv file.
+ */
 public class Plane {
     private String _tailnum;
     private String _type;
@@ -11,7 +15,7 @@ public class Plane {
     private String _engineType;
     private String _year;
 
-    public Plane(String line){
+    public Plane(String line) {
         String data[] = line.split("\\s*,\\s*");
         _tailnum = data[0];
         _type = data[1];
@@ -60,7 +64,7 @@ public class Plane {
         return _year;
     }
 
-    public boolean isOld(String year){
+    public boolean isOld(String year) {
         int myYear = Integer.parseInt(_year);
         int compYear = Integer.parseInt(year);
         return (myYear + 20) < compYear;

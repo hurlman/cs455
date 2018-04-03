@@ -9,11 +9,20 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Key type used for all map/combine/reduce operations.  Implements WritableComparable.
+ * Contains a "category" and "value".  Category defines the type of data so that it can be
+ * filtered to answer different questions.  FieldType represents the category.  Value is
+ * a descriptor for that category.  For example: category: TIME_OF_DAY, value: '0900'.
+ */
 public class KeyType implements WritableComparable {
 
     private IntWritable _category;
     private Text _value;
 
+    /**
+     * Constructor used for deep copy in the reduce phase, when building temporary maps.
+     */
     public KeyType(KeyType key) {
         _category = new IntWritable(key._category.get());
         _value = new Text(key._value.toString());
@@ -33,7 +42,7 @@ public class KeyType implements WritableComparable {
         return _category.get();
     }
 
-    public String getValue(){
+    public String getValue() {
         return _value.toString();
     }
 
@@ -42,6 +51,9 @@ public class KeyType implements WritableComparable {
         return FieldType.getName(_category.get()) + ": " + _value;
     }
 
+    /**
+     * Comparison happens first by category, then by value.
+     */
     @Override
     public int compareTo(Object o) {
         KeyType kt = (KeyType) o;

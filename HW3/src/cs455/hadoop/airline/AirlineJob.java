@@ -11,6 +11,9 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.IOException;
 
+/**
+ * Main job class.  Single MapReduce job answers all questions with one pass through data.
+ */
 public class AirlineJob {
 
     public static void main(String[] args) {

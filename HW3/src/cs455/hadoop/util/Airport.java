@@ -1,5 +1,9 @@
 package cs455.hadoop.util;
 
+/**
+ * Represents the airport data from the supplemental data set.  Parses lines of data from
+ * the airports.csv file.
+ */
 public class Airport {
     private String _iata;
     private String _airport;

@@ -1,0 +1,335 @@
+Time-Avg-Delay: 1900	13
+Time-Avg-Delay: 2000	13
+Time-Avg-Delay: 2100	12
+Time-Avg-Delay: 1800	12
+Time-Avg-Delay: 1700	11
+Time-Avg-Delay: 1600	10
+Time-Avg-Delay: 1500	9
+Time-Avg-Delay: 2200	9
+Time-Avg-Delay: 1400	8
+Time-Avg-Delay: 0000	8
+Time-Avg-Delay: 2300	8
+Time-Avg-Delay: 1300	7
+Time-Avg-Delay: 1100	6
+Time-Avg-Delay: 1200	6
+Time-Avg-Delay: 1000	5
+Time-Avg-Delay: 0100	5
+Time-Avg-Delay: 0800	4
+Time-Avg-Delay: 0900	4
+Time-Avg-Delay: 0300	2
+Time-Avg-Delay: 0400	2
+Time-Avg-Delay: 0700	2
+Time-Avg-Delay: 0500	1
+Time-Avg-Delay: 0600	1
+Time-Avg-Delay: 0200	1
+Day-Avg-Delay: Thursday	9
+Day-Avg-Delay: Friday	9
+Day-Avg-Delay: Sunday	8
+Day-Avg-Delay: Monday	7
+Day-Avg-Delay: Wednesday	7
+Day-Avg-Delay: Saturday	6
+Day-Avg-Delay: Tuesday	6
+Month-Avg-Delay: December	11
+Month-Avg-Delay: June	9
+Month-Avg-Delay: July	9
+Month-Avg-Delay: August	8
+Month-Avg-Delay: February	8
+Month-Avg-Delay: January	8
+Month-Avg-Delay: March	8
+Month-Avg-Delay: November	6
+Month-Avg-Delay: May	6
+Month-Avg-Delay: April	6
+Month-Avg-Delay: September	5
+Month-Avg-Delay: October	5
+Plane-Age-Avg-Delay: OLD	21
+Plane-Age-Avg-Delay: NEW	21
+Model-Most-Travelled: 757-222	1861178014
+Model-Most-Travelled: 757-232	1823731167
+Model-Most-Travelled: CL-600-2B19	1808678322
+Model-Most-Travelled: MD-88	1581229026
+Model-Most-Travelled: 737-7H4	1007019847
+Model-Most-Travelled: EMB-145LR	927415882
+Model-Most-Travelled: 737-322	904397122
+Model-Most-Travelled: 737-824	867422557
+Model-Most-Travelled: 757-251	771200470
+Model-Most-Travelled: 737-524	719821363
+Model-Most-Flights: CL-600-2B19	4001607
+Model-Most-Flights: MD-88	2897419
+Model-Most-Flights: DC-9-82(MD-82)	2430415
+Model-Most-Flights: A320-232	2063593
+Model-Most-Flights: EMB-145LR	2038632
+Model-Most-Flights: 757-232	1752179
+Model-Most-Flights: 737-7H4	1393710
+Model-Most-Flights: 737-322	1352349
+Model-Most-Flights: 757-222	1347658
+Model-Most-Flights: 737-3H4	1340466
+Plane-Most-Travelled: N551UA	24073793
+Plane-Most-Travelled: N552UA	23886947
+Plane-Most-Travelled: N550UA	23882022
+Plane-Most-Travelled: N548UA	23864258
+Plane-Most-Travelled: N549UA	23837966
+Plane-Most-Travelled: N545UA	23827343
+Plane-Most-Travelled: N544UA	23786542
+Plane-Most-Travelled: N546UA	23446443
+Plane-Most-Travelled: N547UA	23273523
+Plane-Most-Travelled: N636AW	21005705
+Carrier-Avg-Delay: "Mesa Airlines Inc."	48
+Carrier-Avg-Delay: "Independence Air"	39
+Carrier-Avg-Delay: "Comair Inc."	37
+Carrier-Avg-Delay: "Pinnacle Airlines Inc."	37
+Carrier-Avg-Delay: "Atlantic Southeast Airlines"	37
+Carrier-Avg-Delay: "Expressjet Airlines Inc."	36
+Carrier-Avg-Delay: "Eastern Air Lines Inc."	36
+Carrier-Avg-Delay: "AirTran Airways Corporation"	34
+Carrier-Avg-Delay: "ATA Airlines d/b/a ATA"	33
+Carrier-Avg-Delay: "JetBlue Airways"	33
+Carrier-Num-Delays: "Delta Air Lines Inc."	8064705
+Carrier-Num-Delays: "US Airways Inc. (Merged with America West 9/05. Reporting for both starting 10/07.)"	6771312
+Carrier-Num-Delays: "Southwest Airlines Co."	6264617
+Carrier-Num-Delays: "American Airlines Inc."	6064229
+Carrier-Num-Delays: "United Air Lines Inc."	6005036
+Carrier-Num-Delays: "Northwest Airlines Inc."	3187837
+Carrier-Num-Delays: "Continental Air Lines Inc."	3072526
+Carrier-Num-Delays: "American Eagle Airlines Inc."	1386158
+Carrier-Num-Delays: "America West Airlines Inc. (Merged with US Airways 9/05. Stopped reporting 10/07.)"	1365723
+Carrier-Num-Delays: "Trans World Airways LLC"	1327055
+Carrier-Tot-Minutes-Delayed: "Southwest Airlines Co."	147011568
+Carrier-Tot-Minutes-Delayed: "United Air Lines Inc."	142537834
+Carrier-Tot-Minutes-Delayed: "Delta Air Lines Inc."	140536673
+Carrier-Tot-Minutes-Delayed: "American Airlines Inc."	136174538
+Carrier-Tot-Minutes-Delayed: "US Airways Inc. (Merged with America West 9/05. Reporting for both starting 10/07.)"	120204907
+Carrier-Tot-Minutes-Delayed: "Northwest Airlines Inc."	81643815
+Carrier-Tot-Minutes-Delayed: "Continental Air Lines Inc."	73938984
+Carrier-Tot-Minutes-Delayed: "American Eagle Airlines Inc."	45445746
+Carrier-Tot-Minutes-Delayed: "America West Airlines Inc. (Merged with US Airways 9/05. Stopped reporting 10/07.)"	31879774
+Carrier-Tot-Minutes-Delayed: "Trans World Airways LLC"	31278920
+City-Num-Weather-Delay: "Dallas-Fort Worth"-"TX"	74898
+City-Num-Weather-Delay: "Chicago"-"IL"	65429
+City-Num-Weather-Delay: "Atlanta"-"GA"	54745
+City-Num-Weather-Delay: "Houston"-"TX"	43485
+City-Num-Weather-Delay: "New York"-"NY"	32858
+City-Num-Weather-Delay: "Covington"-"KY"	18856
+City-Num-Weather-Delay: "Detroit"-"MI"	18411
+City-Num-Weather-Delay: "Denver"-"CO"	16623
+City-Num-Weather-Delay: "Newark"-"NJ"	16564
+City-Num-Weather-Delay: "Minneapolis"-"MN"	14846
+Airport-by-Year: 1987-"Chicago O'Hare International"	135046
+Airport-by-Year: 1987-"William B Hartsfield-Atlanta Intl"	133092
+Airport-by-Year: 1987-"Dallas-Fort Worth International"	104310
+Airport-by-Year: 1987-"Los Angeles International"	91243
+Airport-by-Year: 1987-"Denver Intl"	87660
+Airport-by-Year: 1987-"San Francisco International"	70103
+Airport-by-Year: 1987-"Lambert-St Louis International"	64787
+Airport-by-Year: 1987-"Newark Intl"	62049
+Airport-by-Year: 1987-"Phoenix Sky Harbor International"	60082
+Airport-by-Year: 1987-"Pittsburgh International"	58061
+Airport-by-Year: 1988-"Chicago O'Hare International"	546260
+Airport-by-Year: 1988-"William B Hartsfield-Atlanta Intl"	520304
+Airport-by-Year: 1988-"Dallas-Fort Worth International"	437115
+Airport-by-Year: 1988-"Los Angeles International"	339395
+Airport-by-Year: 1988-"Denver Intl"	324744
+Airport-by-Year: 1988-"San Francisco International"	261656
+Airport-by-Year: 1988-"Lambert-St Louis International"	257641
+Airport-by-Year: 1988-"Newark Intl"	251549
+Airport-by-Year: 1988-"Phoenix Sky Harbor International"	243970
+Airport-by-Year: 1988-"Pittsburgh International"	237901
+Airport-by-Year: 1989-"Chicago O'Hare International"	528136
+Airport-by-Year: 1989-"Dallas-Fort Worth International"	461421
+Airport-by-Year: 1989-"William B Hartsfield-Atlanta Intl"	448626
+Airport-by-Year: 1989-"Los Angeles International"	326250
+Airport-by-Year: 1989-"Denver Intl"	277980
+Airport-by-Year: 1989-"Phoenix Sky Harbor International"	261235
+Airport-by-Year: 1989-"Lambert-St Louis International"	258135
+Airport-by-Year: 1989-"San Francisco International"	251595
+Airport-by-Year: 1989-"Detroit Metropolitan-Wayne County"	234588
+Airport-by-Year: 1989-"Pittsburgh International"	228712
+Airport-by-Year: 1990-"Chicago O'Hare International"	544122
+Airport-by-Year: 1990-"William B Hartsfield-Atlanta Intl"	540522
+Airport-by-Year: 1990-"Dallas-Fort Worth International"	482372
+Airport-by-Year: 1990-"Los Angeles International"	339296
+Airport-by-Year: 1990-"Phoenix Sky Harbor International"	277897
+Airport-by-Year: 1990-"Denver Intl"	276109
+Airport-by-Year: 1990-"San Francisco International"	259523
+Airport-by-Year: 1990-"Lambert-St Louis International"	255312
+Airport-by-Year: 1990-"Detroit Metropolitan-Wayne County"	242343
+Airport-by-Year: 1990-"Pittsburgh International"	236533
+Airport-by-Year: 1991-"Chicago O'Hare International"	531638
+Airport-by-Year: 1991-"Dallas-Fort Worth International"	491165
+Airport-by-Year: 1991-"William B Hartsfield-Atlanta Intl"	376405
+Airport-by-Year: 1991-"Los Angeles International"	313792
+Airport-by-Year: 1991-"Denver Intl"	276721
+Airport-by-Year: 1991-"Phoenix Sky Harbor International"	275462
+Airport-by-Year: 1991-"San Francisco International"	247072
+Airport-by-Year: 1991-"Charlotte/Douglas International"	244990
+Airport-by-Year: 1991-"Lambert-St Louis International"	241005
+Airport-by-Year: 1991-"Detroit Metropolitan-Wayne County"	240721
+Airport-by-Year: 1992-"Chicago O'Hare International"	557156
+Airport-by-Year: 1992-"Dallas-Fort Worth International"	511566
+Airport-by-Year: 1992-"William B Hartsfield-Atlanta Intl"	405810
+Airport-by-Year: 1992-"Los Angeles International"	310909
+Airport-by-Year: 1992-"Denver Intl"	297117
+Airport-by-Year: 1992-"Phoenix Sky Harbor International"	273532
+Airport-by-Year: 1992-"Pittsburgh International"	268669
+Airport-by-Year: 1992-"Detroit Metropolitan-Wayne County"	250078
+Airport-by-Year: 1992-"Lambert-St Louis International"	248121
+Airport-by-Year: 1992-"Charlotte/Douglas International"	248091
+Airport-by-Year: 1993-"Chicago O'Hare International"	578747
+Airport-by-Year: 1993-"Dallas-Fort Worth International"	525876
+Airport-by-Year: 1993-"William B Hartsfield-Atlanta Intl"	441558
+Airport-by-Year: 1993-"Denver Intl"	320677
+Airport-by-Year: 1993-"Los Angeles International"	303809
+Airport-by-Year: 1993-"Phoenix Sky Harbor International"	269098
+Airport-by-Year: 1993-"Lambert-St Louis International"	266511
+Airport-by-Year: 1993-"Detroit Metropolitan-Wayne County"	258931
+Airport-by-Year: 1993-"Pittsburgh International"	246024
+Airport-by-Year: 1993-"Minneapolis-St Paul Intl"	243553
+Airport-by-Year: 1994-"Chicago O'Hare International"	561461
+Airport-by-Year: 1994-"Dallas-Fort Worth International"	516523
+Airport-by-Year: 1994-"William B Hartsfield-Atlanta Intl"	443074
+Airport-by-Year: 1994-"Los Angeles International"	306453
+Airport-by-Year: 1994-"Lambert-St Louis International"	304409
+Airport-by-Year: 1994-"Denver Intl"	285526
+Airport-by-Year: 1994-"Phoenix Sky Harbor International"	280560
+Airport-by-Year: 1994-"Detroit Metropolitan-Wayne County"	276272
+Airport-by-Year: 1994-"Pittsburgh International"	262939
+Airport-by-Year: 1994-"Charlotte/Douglas International"	259712
+Airport-by-Year: 1995-"Chicago O'Hare International"	586894
+Airport-by-Year: 1995-"Dallas-Fort Worth International"	536286
+Airport-by-Year: 1995-"William B Hartsfield-Atlanta Intl"	460955
+Airport-by-Year: 1995-"Los Angeles International"	359859
+Airport-by-Year: 1995-"Lambert-St Louis International"	349693
+Airport-by-Year: 1995-"Phoenix Sky Harbor International"	314313
+Airport-by-Year: 1995-"Detroit Metropolitan-Wayne County"	295180
+Airport-by-Year: 1995-"Minneapolis-St Paul Intl"	272855
+Airport-by-Year: 1995-"Charlotte/Douglas International"	262837
+Airport-by-Year: 1995-"Denver Intl"	260649
+Airport-by-Year: 1996-"Chicago O'Hare International"	592481
+Airport-by-Year: 1996-"Dallas-Fort Worth International"	498718
+Airport-by-Year: 1996-"William B Hartsfield-Atlanta Intl"	483152
+Airport-by-Year: 1996-"Los Angeles International"	368236
+Airport-by-Year: 1996-"Lambert-St Louis International"	357035
+Airport-by-Year: 1996-"Phoenix Sky Harbor International"	326569
+Airport-by-Year: 1996-"Detroit Metropolitan-Wayne County"	309112
+Airport-by-Year: 1996-"Minneapolis-St Paul Intl"	283831
+Airport-by-Year: 1996-"San Francisco International"	271376
+Airport-by-Year: 1996-"Denver Intl"	263451
+Airport-by-Year: 1997-"Chicago O'Hare International"	595017
+Airport-by-Year: 1997-"Dallas-Fort Worth International"	502290
+Airport-by-Year: 1997-"William B Hartsfield-Atlanta Intl"	500386
+Airport-by-Year: 1997-"Los Angeles International"	376238
+Airport-by-Year: 1997-"Lambert-St Louis International"	354139
+Airport-by-Year: 1997-"Phoenix Sky Harbor International"	334031
+Airport-by-Year: 1997-"Detroit Metropolitan-Wayne County"	311160
+Airport-by-Year: 1997-"San Francisco International"	276381
+Airport-by-Year: 1997-"Minneapolis-St Paul Intl"	276179
+Airport-by-Year: 1997-"Denver Intl"	270405
+Airport-by-Year: 1998-"Chicago O'Hare International"	589806
+Airport-by-Year: 1998-"William B Hartsfield-Atlanta Intl"	510667
+Airport-by-Year: 1998-"Dallas-Fort Worth International"	488062
+Airport-by-Year: 1998-"Los Angeles International"	368207
+Airport-by-Year: 1998-"Lambert-St Louis International"	352031
+Airport-by-Year: 1998-"Phoenix Sky Harbor International"	341965
+Airport-by-Year: 1998-"Detroit Metropolitan-Wayne County"	306849
+Airport-by-Year: 1998-"San Francisco International"	279737
+Airport-by-Year: 1998-"Minneapolis-St Paul Intl"	273358
+Airport-by-Year: 1998-"Denver Intl"	272711
+Airport-by-Year: 1999-"Chicago O'Hare International"	596531
+Airport-by-Year: 1999-"William B Hartsfield-Atlanta Intl"	527343
+Airport-by-Year: 1999-"Dallas-Fort Worth International"	490180
+Airport-by-Year: 1999-"Los Angeles International"	383593
+Airport-by-Year: 1999-"Phoenix Sky Harbor International"	355391
+Airport-by-Year: 1999-"Lambert-St Louis International"	351390
+Airport-by-Year: 1999-"Detroit Metropolitan-Wayne County"	308369
+Airport-by-Year: 1999-"Minneapolis-St Paul Intl"	286834
+Airport-by-Year: 1999-"San Francisco International"	273947
+Airport-by-Year: 1999-"Denver Intl"	271588
+Airport-by-Year: 2000-"Chicago O'Hare International"	593639
+Airport-by-Year: 2000-"William B Hartsfield-Atlanta Intl"	530825
+Airport-by-Year: 2000-"Dallas-Fort Worth International"	493942
+Airport-by-Year: 2000-"Los Angeles International"	424269
+Airport-by-Year: 2000-"Phoenix Sky Harbor International"	377835
+Airport-by-Year: 2000-"Lambert-St Louis International"	339202
+Airport-by-Year: 2000-"Detroit Metropolitan-Wayne County"	307012
+Airport-by-Year: 2000-"Minneapolis-St Paul Intl"	294563
+Airport-by-Year: 2000-"McCarran International"	275552
+Airport-by-Year: 2000-"Denver Intl"	274598
+Airport-by-Year: 2001-"Chicago O'Hare International"	682636
+Airport-by-Year: 2001-"Dallas-Fort Worth International"	624361
+Airport-by-Year: 2001-"William B Hartsfield-Atlanta Intl"	503163
+Airport-by-Year: 2001-"Los Angeles International"	450019
+Airport-by-Year: 2001-"Phoenix Sky Harbor International"	368631
+Airport-by-Year: 2001-"Lambert-St Louis International"	324477
+Airport-by-Year: 2001-"Detroit Metropolitan-Wayne County"	297522
+Airport-by-Year: 2001-"Minneapolis-St Paul Intl"	284955
+Airport-by-Year: 2001-"McCarran International"	272293
+Airport-by-Year: 2001-"Gen Edw L Logan Intl"	266032
+Airport-by-Year: 2002-"Chicago O'Hare International"	654782
+Airport-by-Year: 2002-"Dallas-Fort Worth International"	562709
+Airport-by-Year: 2002-"William B Hartsfield-Atlanta Intl"	463826
+Airport-by-Year: 2002-"Los Angeles International"	364835
+Airport-by-Year: 2002-"Phoenix Sky Harbor International"	347880
+Airport-by-Year: 2002-"Minneapolis-St Paul Intl"	283074
+Airport-by-Year: 2002-"Detroit Metropolitan-Wayne County"	281357
+Airport-by-Year: 2002-"Lambert-St Louis International"	265157
+Airport-by-Year: 2002-"McCarran International"	261191
+Airport-by-Year: 2002-"Denver Intl"	240662
+Airport-by-Year: 2003-"William B Hartsfield-Atlanta Intl"	737402
+Airport-by-Year: 2003-"Chicago O'Hare International"	733432
+Airport-by-Year: 2003-"Dallas-Fort Worth International"	665349
+Airport-by-Year: 2003-"Los Angeles International"	448088
+Airport-by-Year: 2003-"George Bush Intercontinental"	370343
+Airport-by-Year: 2003-"Phoenix Sky Harbor International"	339794
+Airport-by-Year: 2003-"Newark Intl"	300836
+Airport-by-Year: 2003-"Minneapolis-St Paul Intl"	289667
+Airport-by-Year: 2003-"McCarran International"	286350
+Airport-by-Year: 2003-"Denver Intl"	283732
+Airport-by-Year: 2004-"William B Hartsfield-Atlanta Intl"	835061
+Airport-by-Year: 2004-"Chicago O'Hare International"	752376
+Airport-by-Year: 2004-"Dallas-Fort Worth International"	688856
+Airport-by-Year: 2004-"Los Angeles International"	465353
+Airport-by-Year: 2004-"Cincinnati Northern Kentucky Intl"	415948
+Airport-by-Year: 2004-"George Bush Intercontinental"	404126
+Airport-by-Year: 2004-"Phoenix Sky Harbor International"	340445
+Airport-by-Year: 2004-"McCarran International"	316334
+Airport-by-Year: 2004-"Newark Intl"	316287
+Airport-by-Year: 2004-"Denver Intl"	310407
+Airport-by-Year: 2005-"William B Hartsfield-Atlanta Intl"	863478
+Airport-by-Year: 2005-"Chicago O'Hare International"	675450
+Airport-by-Year: 2005-"Dallas-Fort Worth International"	615489
+Airport-by-Year: 2005-"Los Angeles International"	461844
+Airport-by-Year: 2005-"George Bush Intercontinental"	424095
+Airport-by-Year: 2005-"Cincinnati Northern Kentucky Intl"	417073
+Airport-by-Year: 2005-"Denver Intl"	365766
+Airport-by-Year: 2005-"Phoenix Sky Harbor International"	348986
+Airport-by-Year: 2005-"McCarran International"	335091
+Airport-by-Year: 2005-"Salt Lake City Intl"	321336
+Airport-by-Year: 2006-"William B Hartsfield-Atlanta Intl"	812800
+Airport-by-Year: 2006-"Chicago O'Hare International"	747535
+Airport-by-Year: 2006-"Dallas-Fort Worth International"	602475
+Airport-by-Year: 2006-"Los Angeles International"	467688
+Airport-by-Year: 2006-"Denver Intl"	464841
+Airport-by-Year: 2006-"George Bush Intercontinental"	448065
+Airport-by-Year: 2006-"Phoenix Sky Harbor International"	430171
+Airport-by-Year: 2006-"McCarran International"	369449
+Airport-by-Year: 2006-"Newark Intl"	316547
+Airport-by-Year: 2006-"Salt Lake City Intl"	284342
+Airport-by-Year: 2007-"William B Hartsfield-Atlanta Intl"	827656
+Airport-by-Year: 2007-"Chicago O'Hare International"	751500
+Airport-by-Year: 2007-"Dallas-Fort Worth International"	594826
+Airport-by-Year: 2007-"Denver Intl"	481686
+Airport-by-Year: 2007-"Los Angeles International"	475273
+Airport-by-Year: 2007-"Phoenix Sky Harbor International"	422170
+Airport-by-Year: 2007-"George Bush Intercontinental"	400848
+Airport-by-Year: 2007-"McCarran International"	367359
+Airport-by-Year: 2007-"Detroit Metropolitan-Wayne County"	354949
+Airport-by-Year: 2007-"Minneapolis-St Paul Intl"	311678
+Airport-by-Year: 2008-"William B Hartsfield-Atlanta Intl"	829034
+Airport-by-Year: 2008-"Chicago O'Hare International"	700832
+Airport-by-Year: 2008-"Dallas-Fort Worth International"	562682
+Airport-by-Year: 2008-"Denver Intl"	482913
+Airport-by-Year: 2008-"Los Angeles International"	431293
+Airport-by-Year: 2008-"Phoenix Sky Harbor International"	398824
+Airport-by-Year: 2008-"George Bush Intercontinental"	370332
+Airport-by-Year: 2008-"McCarran International"	345747
+Airport-by-Year: 2008-"Detroit Metropolitan-Wayne County"	323989
+Airport-by-Year: 2008-"San Francisco International"	281166
